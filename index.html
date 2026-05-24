@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>IDLE FARM EMPIRE: MAX TYCOON</title>
+    <title>IDLE FARM EMPIRE: ANTICHEAT EDITION</title>
     <style>
         body { background: linear-gradient(135deg, #111e36 0%, #1c355e 100%); color: white; font-family: Arial, sans-serif; text-align: center; padding: 10px; margin: 0; min-height: 100vh; user-select: none; }
         h1 { font-size: 20px; margin: 5px 0; color: #f1c40f; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
@@ -31,6 +31,7 @@
         .btn-box { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 10px; width: 316px; }
         button { border: none; color: white; padding: 8px 12px; font-size: 11px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; transition: opacity 0.2s; }
         button:hover { opacity: 0.9; }
+        button:disabled { background: #555 !important; cursor: not-allowed; opacity: 0.6; box-shadow: none !important; transform: none !important; }
         
         .upgrade-btn { background: linear-gradient(#2ecc71, #27ae60); box-shadow: 0 3px 0 #1e7e34; }
         .market-btn  { background: linear-gradient(#e67e22, #d35400); box-shadow: 0 3px 0 #a04000; }
@@ -62,7 +63,6 @@
         .trend { font-size: 9px; font-weight: bold; }
         .trend-up { color: #2ecc71; } .trend-down { color: #e74c3c; }
 
-        /* Всплывающий текст крита */
         .crit-text { position: absolute; color: #f1c40f; font-weight: bold; font-size: 11px; animation: floatUp 1s forwards; background: rgba(0,0,0,0.7); padding: 2px 4px; border-radius: 4px; pointer-events: none; z-index: 10; text-align: center; width: 90%; }
         @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-40px); } }
         .invest-btn { background: #f1c40f; color: #111e36; padding: 1px 4px; font-size: 9px; font-weight: bold; border-radius: 4px; width: auto; margin-left: 5px; display: inline-block; }
@@ -115,7 +115,8 @@
                 <span id="fuel-display">100/100 л.</span>
             </div>
             <button class="upgrade-btn" style="background:linear-gradient(#f1c40f,#f39c12); box-shadow:0 3px 0 #d35400;" onclick="refuelTractor()">⛽ ЗАПРАВИТЬ ТРАКТОР ($0.50)</button>
-            <button class="ad-btn" onclick="watchAdReward()">📺 СМОТРЕТЬ РЕКЛАМУ (+10$)</button>
+            
+            <button id="ad-button" class="ad-btn" onclick="watchAdWithAntiCheat()">📺 СМОТРЕТЬ РЕКЛАМУ (+2.0$)</button>
         </div>
         <div id="tractor-status" style="font-size:11px; margin-top:5px; font-weight:bold;">Тракторов: 0</div>
     </div>
@@ -192,7 +193,10 @@
     let factoryProgress = 0;
     let isFactoryRunning = false;
 
-    // Симуляция инвестиций в ботов
+    // Античит-переменные для рекламы
+    let lastAdTime = parseInt(localStorage.getItem('mx_last_ad_time')) || 0;
+    const AD_COOLDOWN = 30000; // Кулдаун рекламы: 30 секунд
+
     let botShares = JSON.parse(localStorage.getItem('mx_bot_shares')) || [0, 0, 0];
 
     const bots = [
@@ -319,7 +323,6 @@
 
         stock[plots[i].type]++;
         
-        // Визуальный КРИТ-эффект с вылетающим текстом
         if (!isAuto && Math.random() < 0.10) {
             let bonus = getCropPrice(plots[i].type) * 5;
             money += bonus;
@@ -376,9 +379,8 @@
         money -= 0.10; seeds += 10; save(); updateUI();
     }
 
-    // Инвестирование в акции ботов
     function buyBotShare(index) {
-        let cost = bots[index].money * 0.2; // Цена доли — 20% от капитала бота
+        let cost = bots[index].money * 0.2; 
         if (money < cost) return alert('Недостаточно денег для покупки акций этого фермера!');
         money -= cost;
         botShares[index]++;
@@ -421,9 +423,36 @@
         money -= 0.50; currentFuel = getMaxFuel(); save(); updateUI();
     }
 
-    function watchAdReward() {
-        money += AD_REWARD; maxScore = Math.max(maxScore, money);
-        qAds++; checkQuests(); save(); updateUI();
+    // ──🛡️ АНТИЧИТ СИСТЕМА ДЛЯ РЕКЛАМЫ ──────────────────────────────────────────
+    function watchAdWithAntiCheat() {
+        const now = Date.now();
+        const timePassed = now - lastAdTime;
+
+        // 1. Проверка на кулдаун (30 сек)
+        if (timePassed < AD_COOLDOWN) {
+            alert(`⏳ Рекламная сеть перегружена! Подождите еще ${Math.ceil((AD_COOLDOWN - timePassed)/1000)} сек.`);
+            return;
+        }
+
+        // 2. Генерация капчи (Анти-кликер)
+        let num1 = Math.floor(Math.random() * 5) + 2; // от 2 до 6
+        let num2 = Math.floor(Math.random() * 4) + 1; // от 1 до 4
+        let correctAnswer = num1 + num2;
+
+        let playerAnswer = prompt(`🤖 ПРОВЕРКА НА РОБОТА (Защита от кликеров):\nСколько будет ${num1} + ${num2}?`);
+        
+        if (playerAnswer === null) return; // Нажал отмену
+
+        if (parseInt(playerAnswer) === correctAnswer) {
+            // Успех! Начисляем награду
+            money += AD_REWARD; maxScore = Math.max(maxScore, money);
+            qAds++; 
+            lastAdTime = Date.now(); // Сбрасываем таймер
+            checkQuests(); save(); updateUI();
+            alert(`📺 Реклама просмотрена! Получено +${AD_REWARD}$`);
+        } else {
+            alert("❌ Неверный ответ! Автокликеры заблокированы. Попробуйте еще раз.");
+        }
     }
 
     function checkQuests() {
@@ -478,8 +507,22 @@
         document.getElementById('cost-c-t').innerText = getCropUpgradeCost(2).toFixed(1);
         document.getElementById('cost-c-w').innerText = getCropUpgradeCost(3).toFixed(1);
 
-        const now = new Date();
-        document.getElementById('clock').innerText = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0') + ':' + String(now.getSeconds()).padStart(2,'0');
+        const now = Date.now();
+        const timePassed = now - lastAdTime;
+        const btnAd = document.getElementById('ad-button');
+        
+        // Визуальное обновление состояния кнопки рекламы (пишем сколько секунд до разблокировки)
+        if (timePassed < AD_COOLDOWN) {
+            let secLeft = Math.ceil((AD_COOLDOWN - timePassed) / 1000);
+            btnAd.innerText = `⏳ ПОДОЖДИТЕ ${secLeft} сек.`;
+            btnAd.disabled = true;
+        } else {
+            btnAd.innerText = `📺 СМОТРЕТЬ РЕКЛАМУ (+2.0$)`;
+            btnAd.disabled = false;
+        }
+
+        const nowDate = new Date();
+        document.getElementById('clock').innerText = String(nowDate.getHours()).padStart(2,'0') + ':' + String(nowDate.getMinutes()).padStart(2,'0') + ':' + String(nowDate.getSeconds()).padStart(2,'0');
         document.getElementById('weather-display').innerText = `🌦️ ПОГОДА: ${currentWeather.name} (${currentWeather.desc})`;
 
         if (maxScore >= 0.10) document.getElementById('badge-first-money').classList.add('unlocked');
@@ -491,116 +534,4 @@
             { t: `🌾 Собрать урожай: ${Math.min(10, qHarvested)}/10`, d: qRewardClaimed[0] },
             { t: `📺 Глянуть рекламу: ${Math.min(2, qAds)}/2`, d: qRewardClaimed[1] },
             { t: `🚜 Купить трактор: ${Math.min(1, qTractors)}/1`, d: qRewardClaimed[2] }
-        ].map(q => `<div class="quest-item ${q.d ? 'quest-done' : ''}">${q.d ? '✅' : '⏳'} ${q.t}</div>`).join('');
-
-        // Лидерборд с возможностью инвестирования (Купить акции)
-        const all = bots.concat([{ name: 'ВЫ', money: maxScore, isPlayer: true }]).sort((a,b) => b.money - a.money);
-        document.getElementById('leaderboard').innerHTML = all.map((p) => {
-            if (p.isPlayer) {
-                return `<div class="leader-item player-row"><span>⭐ ВЫ</span><span>${p.money.toFixed(2)}$</span></div>`;
-            } else {
-                let botIdx = bots.findIndex(b => b.name === p.name);
-                let shareCount = botShares[botIdx] || 0;
-                let cost = p.money * 0.2;
-                return `<div class="leader-item">
-                    <span>${p.name} <small style="color:#2ecc71;">(x${shareCount})</small></span>
-                    <span>${p.money.toFixed(2)}$ <button class="invest-btn" onclick="buyBotShare(${botIdx})" title="Купить долю за ${cost.toFixed(2)}$">💸</button></span>
-                </div>`;
-            }
-        }).join('');
-
-        renderGrid();
-    }
-
-    function save() {
-        localStorage.setItem('mx_money', money); localStorage.setItem('mx_level', level); localStorage.setItem('mx_seeds', seeds);
-        localStorage.setItem('mx_tractors', tractorsCount); localStorage.setItem('mx_tractor_cost', tractorCost); localStorage.setItem('mx_max_score', maxScore);
-        localStorage.setItem('mx_unlocked', JSON.stringify(unlockedPlots)); localStorage.setItem('mx_s1', stock[1]); localStorage.setItem('mx_s2', stock[2]);
-        localStorage.setItem('mx_s3', stock[3]); localStorage.setItem('mx_sp', processedStock); localStorage.setItem('mx_lc1', cropLevels[1]);
-        localStorage.setItem('mx_lc2', cropLevels[2]); localStorage.setItem('mx_lc3', cropLevels[3]); localStorage.setItem('mx_up_stock', upStockLvl);
-        localStorage.setItem('mx_up_fact', upFactLvl); localStorage.setItem('mx_up_fuel', upFuelLvl); localStorage.setItem('mx_fuel', currentFuel);
-        localStorage.setItem('mx_qh', qHarvested); localStorage.setItem('mx_qa', qAds); localStorage.setItem('mx_qt', qTractors); localStorage.setItem('mx_qclaim', JSON.stringify(qRewardClaimed));
-        localStorage.setItem('mx_bot_shares', JSON.stringify(botShares));
-    }
-
-    window.addEventListener('DOMContentLoaded', function() {
-        gridElement = document.getElementById('farm-grid');
-
-        setInterval(function() {
-            const now = Date.now();
-
-            if (isFactoryRunning) {
-                factoryProgress += (5 + upFactLvl * 2); 
-                if (factoryProgress >= 100) {
-                    isFactoryRunning = false;
-                    factoryProgress = 0;
-                    processedStock += getFactorySpeed(); 
-                }
-            }
-
-            if (tractorsCount > 0 && currentFuel > 0) {
-                currentFuel -= (0.1 * tractorsCount); 
-                if (currentFuel < 0) currentFuel = 0;
-            }
-
-            plots.forEach(function(p, i) {
-                if (p.status === 'growing' && now - p.startTime >= p.duration) {
-                    plots[i].status = 'ready';
-                }
-                // Тракторы сами закупают семена по 0.10$, если включен автосбор и семена кончились!
-                if (tractorsCount > 0 && currentFuel > 0 && unlockedPlots[i]) {
-                    if (plots[i].status === 'ready') harvest(i, true);
-                    if (plots[i].status === 'empty') {
-                        if (i >= FREE_PLOTS && seeds <= 0 && money >= 0.10) {
-                            money -= 0.10; seeds += 10;
-                        }
-                        if (i < FREE_PLOTS || seeds > 0) plantSeed(i);
-                    }
-                }
-            });
-
-            if (Math.random() < 0.02) {
-                let growingPlots = [];
-                plots.forEach((p, index) => { if (p.status === 'growing') growingPlots.push(index); });
-                if (growingPlots.length > 0) {
-                    let randIndex = growingPlots[Math.floor(Math.random() * growingPlots.length)];
-                    plots[randIndex].status = 'bugged';
-                }
-            }
-
-            if (Math.floor(now / 1000) % 10 === 0) {
-                lastTrend = Math.random() > 0.4 ? 'up' : 'down';
-                let mod = lastTrend === 'up' ? 1.3 : 0.7;
-                marketPrices[1] = BASE_REWARDS[1] * mod * (Math.random() * 0.4 + 0.8);
-                marketPrices[2] = BASE_REWARDS[2] * mod * (Math.random() * 0.4 + 0.8);
-                marketPrices[3] = BASE_REWARDS[3] * mod * (Math.random() * 0.4 + 0.8);
-                marketPrices.processed = 0.050 * mod * (Math.random() * 0.3 + 0.9);
-            }
-
-            if (Math.floor(now / 1000) % 30 === 0) {
-                currentWeather = WEATHER_TYPES[Math.floor(Math.random() * WEATHER_TYPES.length)];
-            }
-
-            // Доход ботов + пассивный доход игрока от купленных акций ботов!
-            bots.forEach((b, idx) => { 
-                let botIncome = b.baseIncome * (Math.random() * 0.5 + 0.8);
-                b.money += botIncome; 
-                
-                let playerShares = botShares[idx] || 0;
-                if (playerShares > 0) {
-                    // Игрок получает 5% от дохода бота за каждую акцию
-                    money += botIncome * 0.05 * playerShares;
-                }
-            });
-
-            level = money >= 100 ? 5 : money >= 15 ? 3 : 1;
-
-            save(); updateUI();
-        }, 1000);
-
-        setInterval(function() { updateTimers(); }, 100);
-        updateUI();
-    });
-</script>
-</body>
-</html>
+        ].map(q => `<div class="quest-item ${q.
