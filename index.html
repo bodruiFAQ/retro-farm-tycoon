@@ -96,7 +96,7 @@
     const SEED_BUY_PRICE    = 0.10;
     const MARKET_PRICES     = [0.0003, 0.0004, 0.0005, 0.0006, 0.0008, 0.0010];
 
-    // ── Переменные состояния (Глобальные) ──────────────────────────────────────
+    // ── Состояние игры ─────────────────────────────────────────────────────────
     let money         = parseFloat(localStorage.getItem('v5_money'))        || 0;
     let level         = parseInt(localStorage.getItem('v5_level'))          || 1;
     let seeds         = localStorage.getItem('v5_seeds') !== null ? parseInt(localStorage.getItem('v5_seeds')) : 30;
@@ -174,13 +174,13 @@
         </div>`;
     }
 
-    // ── Отрендерить сетку фермы ──────────────────────────────────────────────────
+    // ── Инициализация структуры сетки (вызывается при изменении состояний) ──────
     function renderGrid() {
         if (!gridElement) return;
-        const now = Date.now();
         gridElement.innerHTML = '';
         plots.forEach(function(plot, i) {
             const div = document.createElement('div');
+            div.id = 'plot-' + i;
             div.className = 'plot';
 
             if (!unlockedPlots[i]) {
@@ -197,11 +197,13 @@
                 div.onclick = function() { plantSeed(i); };
 
             } else if (plot.status === 'growing') {
+                const now = Date.now();
                 const elapsed  = now - plot.startTime;
                 const timeLeft = Math.max(0, plot.duration - elapsed);
                 div.className += ' growing';
                 div.innerHTML = getProgressRing(elapsed, plot.duration, plot.icon)
-                    + `<div class="countdown">${formatTimeLeft(timeLeft)}</div>`;
+                    + `<div class="countdown" id="countdown-${i}">${formatTimeLeft(timeLeft)}</div>`;
+                div.onclick = null; // Растущую грядку кликать нельзя
 
             } else if (plot.status === 'ready') {
                 div.className += ' ready';
@@ -214,7 +216,22 @@
         });
     }
 
-    // ── Игровые действия (Глобальные функции) ───────────────────────────────
+    // ── Обновление только текста таймеров (без пересоздания HTML узлов!) ──────
+    function updateTimers() {
+        const now = Date.now();
+        plots.forEach(function(plot, i) {
+            if (plot.status === 'growing') {
+                const timerEl = document.getElementById('countdown-' + i);
+                if (timerEl) {
+                    const elapsed = now - plot.startTime;
+                    const timeLeft = Math.max(0, plot.duration - elapsed);
+                    timerEl.innerText = formatTimeLeft(timeLeft);
+                }
+            }
+        });
+    }
+
+    // ── Игровые действия ───────────────────────────────────────────────────────
     function unlockPlot(i) {
         const cost = PLOT_UNLOCK_COSTS[i];
         if (money < cost) { alert('Недостаточно денег! Нужно ' + cost + '$'); return; }
@@ -271,7 +288,7 @@
         save(); updateUI();
     }
 
-    // ── Обновление интерфейса ─────────────────────────────────────────────────
+    // ── Обновление остального интерфейса ───────────────────────────────────────
     function updateUI() {
         document.getElementById('money').innerText  = fmt(money);
         document.getElementById('level').innerText  = level;
@@ -344,13 +361,14 @@
         localStorage.setItem('s_watermelon',    sWatermelon);
     }
 
-    // ── Старт игры после загрузки DOM ──────────────────────────────────────────
+    // ── Старт игровых таймеров после загрузки страницы ─────────────────────────
     window.addEventListener('DOMContentLoaded', function() {
         gridElement = document.getElementById('farm-grid');
         
-        // Главный игровой цикл (1 раз в секунду)
+        // Основная логика (1 раз в секунду)
         setInterval(function() {
             const now = Date.now();
+            let needReRender = false;
 
             if (tractorsCount > 0) {
                 money += tractorsCount * TRACTOR_INCOME_PM / 60;
@@ -360,16 +378,17 @@
             plots.forEach(function(p, i) {
                 if (p.status === 'growing' && now - p.startTime >= p.duration) {
                     plots[i].status = 'ready';
+                    needReRender = true; // Перерисуем только когда статус сменился на "Готово"
                 }
             });
 
             if (tractorsCount > 0) {
                 plots.forEach(function(p, i) {
-                    if (p.status === 'ready' && unlockedPlots[i]) harvest(i);
+                    if (p.status === 'ready' && unlockedPlots[i]) { harvest(i); needReRender = true; }
                 });
                 plots.forEach(function(p, i) {
                     if (p.status === 'empty' && unlockedPlots[i]) {
-                        if (i < FREE_PLOTS || seeds > 0) plantSeed(i);
+                        if (i < FREE_PLOTS || seeds > 0) { plantSeed(i); needReRender = true; }
                     }
                 });
             }
@@ -387,10 +406,10 @@
             updateUI();
         }, 1000);
 
-        // Плавная отрисовка таймеров и колец (10 раз в секунду)
-        setInterval(function() { renderGrid(); }, 100);
+        // Мягкое обновление текста цифр таймера (КЛИКИ НЕ СБИВАЮТСЯ)
+        setInterval(function() { updateTimers(); }, 100);
 
-        // Первичный запуск интерфейса
+        // Первый запуск UI
         updateUI();
     });
 </script>
