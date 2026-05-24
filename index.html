@@ -28,11 +28,18 @@
         .leader-item { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px dashed rgba(255,255,255,0.1); }
         .player-row  { color: #5dade2; font-weight: bold; background: rgba(93,173,226,0.2); border-radius: 4px; padding: 3px 5px; }
         .seed-price-box { margin-bottom: 8px; padding: 6px; background: rgba(231,76,60,0.15); border-radius: 8px; font-size: 12px; text-align: center; }
-        @keyframes blink    { 50% { opacity: 0.5; } }
         @keyframes fillRing { from { stroke-dashoffset: 188.5; } to { stroke-dashoffset: 0; } }
         .ring-wrap { position: relative; width: 68px; height: 68px; display: flex; align-items: center; justify-content: center; }
         .ring-wrap .ring-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 22px; pointer-events: none; line-height: 1; }
         .countdown { font-size: 10px; font-weight: bold; color: #ecf0f1; background: rgba(0,0,0,0.55); padding: 1px 5px; border-radius: 8px; margin-top: 2px; }
+        
+        /* Новые стили для квестов и погоды */
+        .weather-box { font-size: 14px; font-weight: bold; background: rgba(52, 152, 219, 0.3); padding: 8px; border-radius: 10px; border: 1px solid #3498db; margin-bottom: 10px; text-align: center; }
+        .quest-item { background: rgba(255,255,255,0.05); padding: 6px; border-radius: 6px; margin-bottom: 5px; font-size: 11px; }
+        .quest-done { border-left: 3px solid #2ecc71; background: rgba(46, 204, 113, 0.1); }
+        .badge-grid { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px; }
+        .badge { font-size: 18px; background: #34495e; padding: 3px 6px; border-radius: 6px; cursor: help; opacity: 0.3; transition: opacity 0.3s; }
+        .badge.unlocked { opacity: 1; background: #d35400; border: 1px solid #f1c40f; }
     </style>
 </head>
 <body>
@@ -47,10 +54,20 @@
 </div>
 
 <div class="main-layout">
+    <!-- Левая панель: Лидерборд, Статистика, Достижения -->
     <div class="left-panel">
         <div class="panel-title">🏆 ГЛОБАЛЬНЫЙ ЛИДЕРБОРД</div>
         <div style="font-size:10px; color:#bdc3c7; text-align:center; margin-bottom:6px;">Сброс каждое воскресенье в 00:00</div>
         <div id="leaderboard"></div>
+        
+        <div class="panel-title" style="margin-top:15px;">🏅 ДОСТИЖЕНИЯ</div>
+        <div class="badge-grid">
+            <span class="badge" id="badge-first-money" title="Заработать первые $0.10">💵</span>
+            <span class="badge" id="badge-tractor-5" title="Купить 5 тракторов">🚜</span>
+            <span class="badge" id="badge-rich" title="Стать миллионером центов ($100)">👑</span>
+            <span class="badge" id="badge-watermelon" title="Посадить арбуз">🍉</span>
+        </div>
+
         <div class="panel-title" style="margin-top:15px;">📊 Статистика фермы</div>
         <div>Всего земельных участков: 9</div>
         <div>Посажено моркови: <span id="stat-carrot">0</span></div>
@@ -58,7 +75,9 @@
         <div>Посажено арбузов: <span id="stat-watermelon">0</span></div>
     </div>
 
+    <!-- Центральная панель: Погода, Грядки, Кнопки -->
     <div>
+        <div class="weather-box" id="weather-display">☀️ ПОГОДА: Солнечно (+20% к доходу)</div>
         <div class="grid" id="farm-grid"></div>
         <div class="btn-box">
             <button class="upgrade-btn" onclick="buyAutoTractor()">🛒 КУПИТЬ ТРАКТОР (Стоимость: <span id="tractor-cost">50</span> $)</button>
@@ -67,6 +86,7 @@
         <div id="tractor-status" style="font-size:12px; margin-top:10px; font-weight:bold;">Активных тракторов: 0 (+0.0000 $/мин)</div>
     </div>
 
+    <!-- Правая панель: Рынок и Ежедневные Квесты -->
     <div class="right-panel">
         <div class="panel-title">🏪 РЫНОК СЕМЯН</div>
         <p style="font-size:11px; color:#bdc3c7; margin:0 0 8px 0; text-align:center;">Цены обновляются каждые 10 секунд!</p>
@@ -82,6 +102,9 @@
             <button class="market-btn" style="background:linear-gradient(#95a5a6,#7f8c8d);" onclick="dealSeeds('sell')">ПРОДАЖА -10 СЕМЯН</button>
         </div>
         <div id="night-warning" style="margin-top:15px; color:#f39c12; text-align:center; font-weight:bold; font-size:11px;"></div>
+
+        <div class="panel-title" style="margin-top:20px;">🎯 ЕЖЕДНЕВНЫЕ ЗАДАНИЯ</div>
+        <div id="quests-container"></div>
     </div>
 </div>
 
@@ -96,6 +119,15 @@
     const SEED_BUY_PRICE    = 0.10;
     const MARKET_PRICES     = [0.0003, 0.0004, 0.0005, 0.0006, 0.0008, 0.0010];
 
+    // ── Погода ─────────────────────────────────────────────────────────────────
+    const WEATHER_TYPES = [
+        { name: "Солнечно ☀️", incomeMod: 1.2, speedMod: 1.0, desc: "+20% до врожаю" },
+        { name: "Дождь 🌧️", incomeMod: 1.0, speedMod: 0.5, desc: "Культуры растут в 2 раза быстрее!" },
+        { name: "Засуха 🏜️", incomeMod: 0.8, speedMod: 1.2, desc: "-20% дохода, рост медленнее" },
+        { name: "Обычная 🌤️", incomeMod: 1.0, speedMod: 1.0, desc: "Обычный день на ферме" }
+    ];
+    let currentWeather = WEATHER_TYPES[3];
+
     // ── Состояние игры ─────────────────────────────────────────────────────────
     let money         = parseFloat(localStorage.getItem('v5_money'))        || 0;
     let level         = parseInt(localStorage.getItem('v5_level'))          || 1;
@@ -107,9 +139,16 @@
                         || [true,true,true,false,false,false,false,false,false];
     let lastWeeklyReset = parseInt(localStorage.getItem('v5_weekly_reset')) || 0;
 
+    // Статистика посадок
     let sCarrot     = parseInt(localStorage.getItem('s_carrot'))     || 0;
     let sTomato     = parseInt(localStorage.getItem('s_tomato'))     || 0;
     let sWatermelon = parseInt(localStorage.getItem('s_watermelon')) || 0;
+
+    // Ежедневные квесты (Прогресс)
+    let qHarvested = parseInt(localStorage.getItem('q_harvested')) || 0;
+    let qAds       = parseInt(localStorage.getItem('q_ads'))       || 0;
+    let qTractors  = parseInt(localStorage.getItem('q_tractors'))  || 0;
+    let qRewardClaimed = JSON.parse(localStorage.getItem('q_claimed') || '[false, false, false]');
 
     maxScore = Math.max(maxScore, money);
     let currentMarketPrice = MARKET_PRICES[2];
@@ -143,20 +182,16 @@
     }
 
     function getCropData() {
-        if (level >= 5) return { id: 3, icon: '🍉', name: 'АРБУЗ',   reward: HARVEST_REWARD, time: 5000 };
-        if (level >= 3) return { id: 2, icon: '🍅', name: 'ПОМИДОР', reward: HARVEST_REWARD, time: 3500 };
-        return             { id: 1, icon: '🥕', name: 'МОРКОВЬ',  reward: HARVEST_REWARD, time: 2000 };
+        // Учитываем модификатор скорости от погоды (speedMod)
+        if (level >= 5) return { id: 3, icon: '🍉', name: 'АРБУЗ',   reward: HARVEST_REWARD, time: 5000 * currentWeather.speedMod };
+        if (level >= 3) return { id: 2, icon: '🍅', name: 'ПОМИДОР', reward: HARVEST_REWARD, time: 3500 * currentWeather.speedMod };
+        return             { id: 1, icon: '🥕', name: 'МОРКОВЬ',  reward: HARVEST_REWARD, time: 2000 * currentWeather.speedMod };
     }
 
     const SOIL_SVG = `<svg width="52" height="44" viewBox="0 0 44 38" xmlns="http://www.w3.org/2000/svg">
       <ellipse cx="22" cy="31" rx="20" ry="7" fill="#3d1c0e"/>
       <path d="M2 31 Q9 16 22 14 Q35 16 42 31 Z" fill="#8B4513"/>
       <path d="M5 28 Q14 20 22 19 Q30 20 39 28" fill="none" stroke="#6b2d0a" stroke-width="1.8" opacity="0.6"/>
-      <circle cx="13" cy="25" r="2"   fill="#2a0e04" opacity="0.75"/>
-      <circle cx="22" cy="23" r="1.4" fill="#2a0e04" opacity="0.75"/>
-      <circle cx="31" cy="25" r="1.8" fill="#2a0e04" opacity="0.75"/>
-      <circle cx="18" cy="27.5" r="1.1" fill="#2a0e04" opacity="0.6"/>
-      <circle cx="27" cy="27.5" r="1.3" fill="#2a0e04" opacity="0.6"/>
     </svg>`;
 
     function getProgressRing(elapsed, duration, icon) {
@@ -174,7 +209,7 @@
         </div>`;
     }
 
-    // ── Инициализация структуры сетки (вызывается при изменении состояний) ──────
+    // ── Рендеринг грядок ───────────────────────────────────────────────────────
     function renderGrid() {
         if (!gridElement) return;
         gridElement.innerHTML = '';
@@ -203,12 +238,14 @@
                 div.className += ' growing';
                 div.innerHTML = getProgressRing(elapsed, plot.duration, plot.icon)
                     + `<div class="countdown" id="countdown-${i}">${formatTimeLeft(timeLeft)}</div>`;
-                div.onclick = null; // Растущую грядку кликать нельзя
+                div.onclick = null;
 
             } else if (plot.status === 'ready') {
                 div.className += ' ready';
+                // Погода влияет на финальную награду при ручном или авто сборе!
+                const finalReward = plot.reward * currentWeather.incomeMod;
                 div.innerHTML = `<div style="font-size:34px;">${plot.icon}</div>
-                    <div class="plot-label">СОБРАТЬ +${fmt(plot.reward)}$</div>`;
+                    <div class="plot-label">СОБРАТЬ +${fmt(finalReward)}$</div>`;
                 div.onclick = function() { harvest(i); };
             }
 
@@ -216,7 +253,6 @@
         });
     }
 
-    // ── Обновление только текста таймеров (без пересоздания HTML узлов!) ──────
     function updateTimers() {
         const now = Date.now();
         plots.forEach(function(plot, i) {
@@ -231,7 +267,7 @@
         });
     }
 
-    // ── Игровые действия ───────────────────────────────────────────────────────
+    // ── Игровые Действия ───────────────────────────────────────────────────────
     function unlockPlot(i) {
         const cost = PLOT_UNLOCK_COSTS[i];
         if (money < cost) { alert('Недостаточно денег! Нужно ' + cost + '$'); return; }
@@ -253,10 +289,15 @@
     }
 
     function harvest(i) {
-        money += plots[i].reward;
+        // Добавляем деньги с учетом погоды
+        money += plots[i].reward * currentWeather.incomeMod;
         maxScore = Math.max(maxScore, money);
         level = money >= 60 ? 5 : money >= 20 ? 3 : 1;
         plots[i] = { status: 'empty', startTime: 0, duration: 0, icon: '', reward: 0 };
+        
+        // Прогресс квеста
+        qHarvested++;
+        checkQuests();
         save(); updateUI();
     }
 
@@ -265,6 +306,10 @@
         money -= tractorCost;
         tractorsCount++;
         tractorCost = Math.floor(tractorCost * 1.8);
+        
+        // Прогресс квеста
+        qTractors++;
+        checkQuests();
         save(); updateUI();
     }
 
@@ -272,6 +317,10 @@
         money += AD_REWARD;
         maxScore = Math.max(maxScore, money);
         level = money >= 60 ? 5 : money >= 20 ? 3 : 1;
+        
+        // Прогресс квеста
+        qAds++;
+        checkQuests();
         save(); updateUI();
     }
 
@@ -288,14 +337,54 @@
         save(); updateUI();
     }
 
-    // ── Обновление остального интерфейса ───────────────────────────────────────
+    // ── Квесты и Достижения ────────────────────────────────────────────────────
+    function checkQuests() {
+        // Квест 1: Собрать 10 растений -> бонус $5
+        if (qHarvested >= 10 && !qRewardClaimed[0]) {
+            money += 5; qRewardClaimed[0] = true; alert('🎉 Квест выполнен: Собрано 10 культур! Награда: +$5');
+        }
+        // Квест 2: Посмотреть 2 рекламы -> бонус $5
+        if (qAds >= 2 && !qRewardClaimed[1]) {
+            money += 5; qRewardClaimed[1] = true; alert('🎉 Квест выполнен: Посмотрено 2 рекламы! Награда: +$5');
+        }
+        // Квест 3: Купить 1 трактор -> бонус $5
+        if (qTractors >= 1 && !qRewardClaimed[2]) {
+            money += 5; qRewardClaimed[2] = true; alert('🎉 Квест выполнен: Куплен трактор! Награда: +$5');
+        }
+    }
+
+    function updateBadges() {
+        if (maxScore >= 0.10) document.getElementById('badge-first-money').classList.add('unlocked');
+        if (tractorsCount >= 5) document.getElementById('badge-tractor-5').classList.add('unlocked');
+        if (maxScore >= 100) document.getElementById('badge-rich').classList.add('unlocked');
+        if (sWatermelon >= 1) document.getElementById('badge-watermelon').classList.add('unlocked');
+    }
+
+    function renderQuests() {
+        const qContainer = document.getElementById('quests-container');
+        if (!qContainer) return;
+
+        const quests = [
+            { text: `🌾 Собрать урожай: ${Math.min(10, qHarvested)}/10`, done: qRewardClaimed[0] },
+            { text: `📺 Глянуть рекламу: ${Math.min(2, qAds)}/2`, done: qRewardClaimed[1] },
+            { text: `🚜 Купить трактор: ${Math.min(1, qTractors)}/1`, done: qRewardClaimed[2] }
+        ];
+
+        qContainer.innerHTML = quests.map(q => 
+            `<div class="quest-item ${q.done ? 'quest-done' : ''}">
+                ${q.done ? '✅' : '⏳'} ${q.text} ${q.done ? '<b>(Выполнен, +$5)</b>' : ''}
+            </div>`
+        ).join('');
+    }
+
+    // ── Обновление Интерфейса ──────────────────────────────────────────────────
     function updateUI() {
         document.getElementById('money').innerText  = fmt(money);
         document.getElementById('level').innerText  = level;
         document.getElementById('seeds').innerText  = seeds;
         document.getElementById('tractor-cost').innerText = tractorCost;
 
-        const incomePerMin = tractorsCount * TRACTOR_INCOME_PM;
+        const incomePerMin = tractorsCount * TRACTOR_INCOME_PM * currentWeather.incomeMod;
         document.getElementById('tractor-status').innerText =
             'Активных тракторов: ' + tractorsCount + ' (+' + fmt(incomePerMin) + ' $/мин)';
 
@@ -314,8 +403,12 @@
             String(now.getMinutes()).padStart(2,'0') + ':' +
             String(now.getSeconds()).padStart(2,'0');
 
+        document.getElementById('weather-display').innerText = `🌦️ ПОГОДА: ${currentWeather.name} (${currentWeather.desc})`;
+
         renderLeaderboard();
         checkWeeklyReset();
+        renderQuests();
+        updateBadges();
 
         const h = now.getHours();
         document.getElementById('night-warning').innerText =
@@ -344,6 +437,10 @@
             maxScore = money;
             lastWeeklyReset = now;
             bots.forEach(function(b) { b.money = parseFloat((Math.random() * 5).toFixed(2)); });
+            
+            // Сброс квестов раз в неделю
+            qHarvested = 0; qAds = 0; qTractors = 0;
+            qRewardClaimed = [false, false, false];
             localStorage.setItem('v5_weekly_reset', lastWeeklyReset);
         }
     }
@@ -359,44 +456,55 @@
         localStorage.setItem('s_carrot',        sCarrot);
         localStorage.setItem('s_tomato',        sTomato);
         localStorage.setItem('s_watermelon',    sWatermelon);
+        
+        // Квесты
+        localStorage.setItem('q_harvested',     qHarvested);
+        localStorage.setItem('q_ads',           qAds);
+        localStorage.setItem('q_tractors',      qTractors);
+        localStorage.setItem('q_claimed',       JSON.stringify(qRewardClaimed));
     }
 
-    // ── Старт игровых таймеров после загрузки страницы ─────────────────────────
+    // ── Старт игровых таймеров ─────────────────────────────────────────────────
     window.addEventListener('DOMContentLoaded', function() {
         gridElement = document.getElementById('farm-grid');
         
-        // Основная логика (1 раз в секунду)
+        // Главный игровой цикл (раз в секунду)
         setInterval(function() {
             const now = Date.now();
-            let needReRender = false;
 
             if (tractorsCount > 0) {
-                money += tractorsCount * TRACTOR_INCOME_PM / 60;
+                // Доход трактора тоже зависит от погоды
+                money += (tractorsCount * TRACTOR_INCOME_PM * currentWeather.incomeMod) / 60;
                 maxScore = Math.max(maxScore, money);
             }
 
             plots.forEach(function(p, i) {
                 if (p.status === 'growing' && now - p.startTime >= p.duration) {
                     plots[i].status = 'ready';
-                    needReRender = true; // Перерисуем только когда статус сменился на "Готово"
                 }
             });
 
             if (tractorsCount > 0) {
                 plots.forEach(function(p, i) {
-                    if (p.status === 'ready' && unlockedPlots[i]) { harvest(i); needReRender = true; }
+                    if (p.status === 'ready' && unlockedPlots[i]) harvest(i);
                 });
                 plots.forEach(function(p, i) {
                     if (p.status === 'empty' && unlockedPlots[i]) {
-                        if (i < FREE_PLOTS || seeds > 0) { plantSeed(i); needReRender = true; }
+                        if (i < FREE_PLOTS || seeds > 0) plantSeed(i);
                     }
                 });
             }
 
+            // Каждые 10 секунд меняется цена на рынке
             if (Math.floor(now / 1000) % 10 === 0) {
                 const h = new Date().getHours();
                 const base = MARKET_PRICES[Math.floor(Math.random() * MARKET_PRICES.length)];
                 currentMarketPrice = (h >= 22 || h < 6) ? parseFloat((base * 1.2).toFixed(5)) : base;
+            }
+
+            // Смена погоды каждые 30 секунд
+            if (Math.floor(now / 1000) % 30 === 0) {
+                currentWeather = WEATHER_TYPES[Math.floor(Math.random() * WEATHER_TYPES.length)];
             }
 
             bots.forEach(function(b) { b.money += parseFloat((Math.random() * 0.001).toFixed(5)); });
@@ -406,10 +514,8 @@
             updateUI();
         }, 1000);
 
-        // Мягкое обновление текста цифр таймера (КЛИКИ НЕ СБИВАЮТСЯ)
         setInterval(function() { updateTimers(); }, 100);
 
-        // Первый запуск UI
         updateUI();
     });
 </script>
