@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>IDLE FARM EMPIRE: QUEST MASTER</title>
+    <title>IDLE FARM EMPIRE: PEST CONTROL UPDATE</title>
     <style>
         body { background: linear-gradient(135deg, #111e36 0%, #1c355e 100%); color: white; font-family: Arial, sans-serif; text-align: center; padding: 10px; margin: 0; min-height: 100vh; user-select: none; }
         h1 { font-size: 20px; margin: 5px 0; color: #f1c40f; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
@@ -50,9 +50,8 @@
         .countdown { font-size: 9px; font-weight: bold; color: #ecf0f1; background: rgba(0,0,0,0.55); padding: 1px 4px; border-radius: 6px; margin-top: 2px; }
         
         .weather-box { font-size: 13px; font-weight: bold; background: rgba(52, 152, 219, 0.3); padding: 6px; border-radius: 8px; border: 1px solid #3498db; margin-bottom: 8px; text-align: center; width: 316px; box-sizing: border-box; }
-        .pest-status-box { font-size: 11px; margin-bottom: 6px; background: rgba(46, 204, 113, 0.15); padding: 4px; border-radius: 6px; width: 316px; box-sizing: border-box; border: 1px dashed #2ecc71; display: flex; justify-content: space-around; }
+        .pest-status-box { font-size: 11px; margin-bottom: 6px; background: rgba(46, 204, 113, 0.15); padding: 4px; border-radius: 6px; width: 316px; box-sizing: border-box; border: 1px dashed #2ecc71; display: flex; flex-direction: column; gap: 4px; align-items: center; }
 
-        /* Новые стили динамических квестов */
         .quest-box { display: flex; flex-direction: column; gap: 6px; }
         .quest-card { background: rgba(255,255,255,0.05); padding: 6px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); font-size: 10px; }
         .quest-card.ready-to-claim { border-color: #2ecc71; background: rgba(46, 204, 113, 0.1); }
@@ -113,8 +112,11 @@
         <div class="weather-box" id="weather-display">☀️ ПОГОДА: Загрузка...</div>
         
         <div class="pest-status-box">
-            <span id="pesticide-timer">🧴 Защита: Выкл</span>
-            <span id="dog-status">🐕 Пёс: Не нанят</span>
+            <div style="display: flex; gap: 15px;">
+                <span id="pesticide-timer">🧴 Защита: Выкл</span>
+                <span id="dog-status">🐕 Пёс: Не нанят</span>
+            </div>
+            <div id="pest-cooldown-timer" style="font-size: 10px; color: #e74c3c; font-weight: bold;"></div>
         </div>
 
         <div class="grid" id="farm-grid"></div>
@@ -146,9 +148,12 @@
         </div>
 
         <div class="panel-title" style="margin-top:10px;">🛡️ ЗАЩИТА ОТ ЖУКОВ</div>
-        <div class="up-row">
-            <span>🧴 Пестициды (1 час)</span>
-            <button class="pest-btn" onclick="buyPesticides()">Купить ($0.20)</button>
+        <div class="up-row" style="flex-direction: column; align-items: stretch; gap: 4px; padding: 6px;">
+            <div style="display: flex; justify-content: space-between; font-size: 10px;">
+                <span>🧴 Пестициды (1 ч. работы)</span>
+                <span id="pest-use-count" style="color: #f1c40f; font-weight: bold;">Использовано: 0/5</span>
+            </div>
+            <button id="pest-buy-btn" class="pest-btn" onclick="buyPesticides()">Купить (Бесплатно)</button>
         </div>
         <div class="up-row">
             <span>🐕 Пёс-Охотник (Ур. 5)</span>
@@ -166,8 +171,7 @@
         <div class="up-row"><span>🍉 Арбуз (Лвл <span id="lvl-w">1</span>)</span><button class="upgrade-btn" onclick="upgradeCrop(3)">Up (<span id="cost-c-w">5.0</span>$)</button></div>
 
         <div class="panel-title" style="margin-top:8px;">🎯 КОНТРАКТЫ И КВЕСТЫ</div>
-        <div class="quest-box" id="quests-container">
-            </div>
+        <div class="quest-box" id="quests-container"></div>
     </div>
 </div>
 
@@ -187,6 +191,9 @@
         { name: "Обычная 🌤️", income: 1.0, speed: 1.0, desc: "Все спокойно" }
     ];
 
+    // Цены на пестициды по уровням покупки
+    const PEST_PRICES = [0, 10.0, 50.0, 150.0, 500.0];
+
     let money = parseFloat(localStorage.getItem('mx_money')) || 0;
     let level = parseInt(localStorage.getItem('mx_level')) || 1;
     let seeds = localStorage.getItem('mx_seeds') !== null ? parseInt(localStorage.getItem('mx_seeds')) : 30;
@@ -204,18 +211,22 @@
     let upFuelLvl  = parseInt(localStorage.getItem('mx_up_fuel'))  || 0;
     let currentFuel = parseFloat(localStorage.getItem('mx_fuel')) || 100;
 
+    // МЕХАНИКА ОБНОВЛЕННЫХ ПЕСТИЦИДОВ
     let pesticideUntil = parseInt(localStorage.getItem('mx_pest_until')) || 0;
-    let dogCharges = parseInt(localStorage.getItem('mx_dog_charges')) || 0;
+    let pesticideCooldownUntil = parseInt(localStorage.getItem('mx_pest_cd_until')) || 0;
+    let pesticideDailyUses = parseInt(localStorage.getItem('mx_pest_uses')) || 0;
+    let pesticideLastDate = localStorage.getItem('mx_pest_date') || "";
 
+    let dogCharges = parseInt(localStorage.getItem('mx_dog_charges')) || 0;
     let statKilledBugs = parseInt(localStorage.getItem('mx_st_bugs')) || 0;
     let statProcessedCount = parseInt(localStorage.getItem('mx_st_proc')) || 0;
     let statDogSaves = parseInt(localStorage.getItem('mx_st_dogsaves')) || 0;
+    let qAds = parseInt(localStorage.getItem('mx_st_qads')) || 0;
 
     let achLevels = JSON.parse(localStorage.getItem('mx_ach_lvls')) || {
         money: 0, tractors: 0, bugs: 0, factory: 0, ads: 0, dog: 0
     };
 
-    // СТРУКТУРА ДИНАМИЧЕСКИХ КВЕСТОВ
     let activeQuests = JSON.parse(localStorage.getItem('mx_active_quests')) || [];
 
     const ACHIEVEMENT_DB = {
@@ -281,7 +292,17 @@
         return                 { type: 1, icon: '🥕', time: BASE_TIMES[1] * currentWeather.speed };
     }
 
-    // ──🎯 ГЕНЕРАТОР НОВЫХ СЛУЧАЙНЫХ КВЕСТОВ ───────────────────────────────────
+    // Проверка сброса ежедневных лимитов по календарному дню
+    function checkDailyReset() {
+        let todayStr = new Date().toDateString();
+        if (pesticideLastDate !== todayStr) {
+            pesticideDailyUses = 0;
+            pesticideLastDate = todayStr;
+            save();
+        }
+    }
+
+    // ──🎯 СИСТЕМА КВЕСТОВ ───────────────────────────────────
     function generateRandomQuest(slotIndex) {
         const questTypes = [
             { id: 'harvest', text: 'Собрать урожай', baseTarget: 15, multi: 10, rewMoney: 0.15, rewSeeds: 8 },
@@ -292,9 +313,7 @@
             { id: 'sell_money', text: 'Продать товаров на бирже', baseTarget: 0.5, multi: 1.5, rewMoney: 0.30, rewSeeds: 10 }
         ];
 
-        // Случайный выбор типа квеста
         let type = questTypes[Math.floor(Math.random() * questTypes.length)];
-        // Множитель сложности в зависимости от уровня игрока
         let difficultyFactor = Math.max(1, Math.floor(level * 0.8));
 
         let finalTarget = type.id === 'sell_money' 
@@ -335,22 +354,57 @@
             money += q.rewMoney;
             seeds += q.rewSeeds;
             q.claimed = true;
-            
             alert(`✅ Контракт выполнен!\nНаграда: +${q.rewMoney}$ и +${q.rewSeeds} семян!`);
-            
-            // Сразу генерируем новый квест в этот слот!
             generateRandomQuest(index);
             save(); updateUI();
         }
     }
 
-    // ──🛡️ ОСТАЛЬНЫЕ МЕХАНИКИ ИГРЫ ───────────────────────────────────────────
+    // ──🛡️ ОБНОВЛЕННАЯ ПОКУПКА ПЕСТИЦИДОВ ───────────────────────────────────
     function buyPesticides() {
-        if (money < 0.20) return alert('Пестициды стоят $0.20!');
-        money -= 0.20; const now = Date.now();
-        if (pesticideUntil > now) { pesticideUntil += 3600000; } else { pesticideUntil = now + 3600000; }
+        checkDailyReset();
+        const now = Date.now();
+
+        // 1. Проверяем, активны ли они прямо сейчас
+        if (pesticideUntil > now) {
+            return alert('🧴 Пестициды уже активны! Дождитесь окончания действия.');
+        }
+
+        // 2. Проверяем кулдаун ожидания (2 часа после окончания работы)
+        if (pesticideCooldownUntil > now) {
+            let timeLeft = Math.ceil((pesticideCooldownUntil - now) / 1000);
+            return alert(`⏳ Химикаты нестабильны! Земля должна отдохнуть. Подождите еще ${Math.floor(timeLeft/60)} мин.`);
+        }
+
+        // 3. Расчет стоимости или рекламы
+        let isAdRequired = pesticideDailyUses >= 5;
+        let currentCost = isAdRequired ? 0 : PEST_PRICES[pesticideDailyUses];
+
+        if (isAdRequired) {
+            // Требуется просмотр рекламы с капчей
+            let num1 = Math.floor(Math.random() * 5) + 2; let num2 = Math.floor(Math.random() * 4) + 1; let correctAnswer = num1 + num2;
+            let playerAnswer = prompt(`📺 Лимит исчерпан! Продление за рекламу.\nРешите пример: ${num1} + ${num2}?`);
+            if (playerAnswer === null) return;
+            if (parseInt(playerAnswer) !== correctAnswer) {
+                return alert("❌ Неверно! Защита не активирована.");
+            }
+            qAds++;
+            progressQuest('ads', 1);
+        } else {
+            // Требуются деньги
+            if (money < currentCost) {
+                return alert(`Мало денег! Эта покупка за день (${pesticideDailyUses + 1}-я) стоит ${currentCost.toFixed(2)}$`);
+            }
+            money -= currentCost;
+        }
+
+        // 4. Активация пестицидов
+        pesticideUntil = now + 3600000; // Ровно 1 час работы
+        pesticideCooldownUntil = pesticideUntil + 7200000; // Кулдаун закончится через 1ч + 2ч ожидания
+        pesticideDailyUses++;
+        
         save(); updateUI();
-        alert('🧴 Пестициды распылены! Ферма защищена от жуков на 1 час.');
+        alert(`🧴 Защита успешно активирована на 1 час!${isAdRequired ? ' (Дополнительный лимит за рекламу)' : ''}`);
     }
 
     function buyDog() {
@@ -361,7 +415,7 @@
     }
 
     function checkAchievements() {
-        const currentStats = { money: maxScore, tractors: tractorsCount, bugs: statKilledBugs, factory: statProcessedCount, ads: achLevels.ads, dog: statDogSaves };
+        const currentStats = { money: maxScore, tractors: tractorsCount, bugs: statKilledBugs, factory: statProcessedCount, ads: qAds, dog: statDogSaves };
         let alertMessages = [];
         for (let key in ACHIEVEMENT_DB) {
             let currentLvl = achLevels[key];
@@ -429,8 +483,7 @@
 
     function killBug(i) {
         plots[i].status = 'growing'; plots[i].startTime = Date.now();
-        statKilledBugs++;
-        progressQuest('bugs', 1); // Прогресс квеста
+        statKilledBugs++; progressQuest('bugs', 1);
         checkAchievements(); save(); updateUI();
     }
 
@@ -443,7 +496,7 @@
             if(event) { showCritText(event.clientX, event.clientY, `✨ КРИТ +${bonus.toFixed(4)}$!`); }
         }
         plots[i] = { status: 'empty', startTime: 0, duration: 0, icon: '', type: 1 };
-        progressQuest('harvest', 1); // Прогресс квеста
+        progressQuest('harvest', 1);
         save(); updateUI();
     }
 
@@ -470,7 +523,7 @@
             totalIncome = processedStock * getProcessedPrice();
             money += totalIncome; maxScore = Math.max(maxScore, money); processedStock = 0;
         }
-        if (totalIncome > 0) progressQuest('sell_money', totalIncome); // Прогресс квеста
+        if (totalIncome > 0) progressQuest('sell_money', totalIncome);
         checkAchievements(); save(); updateUI();
     }
 
@@ -496,8 +549,7 @@
             cost = getUpgradeCost('fuel', upFuelLvl); if (money < cost) return alert('Мало денег!');
             money -= cost; upFuelLvl++; currentFuel = getMaxFuel();
         }
-        progressQuest('upgrades', 1); // Прогресс квеста
-        save(); updateUI();
+        progressQuest('upgrades', 1); save(); updateUI();
     }
 
     function upgradeCrop(type) {
@@ -508,7 +560,7 @@
     function buyAutoTractor() {
         if (money < tractorCost) return alert('Мало денег!');
         money -= tractorCost; tractorsCount++; tractorCost = parseFloat((tractorCost * 1.8).toFixed(2));
-        progressQuest('upgrades', 1); // Трактор считается за апгрейд фермы
+        progressQuest('upgrades', 1);
         checkAchievements(); save(); updateUI();
     }
 
@@ -524,14 +576,15 @@
         if (playerAnswer === null) return;
         if (parseInt(playerAnswer) === correctAnswer) {
             money += AD_REWARD; maxScore = Math.max(maxScore, money);
-            lastAdTime = Date.now();
-            progressQuest('ads', 1); // Прогресс квеста
+            lastAdTime = Date.now(); qAds++;
+            progressQuest('ads', 1);
             checkAchievements(); save(); updateUI();
             alert(`📺 Получено +${AD_REWARD}$`);
         } else { alert("❌ Неверный ответ!"); }
     }
 
     function updateUI() {
+        checkDailyReset();
         const now = Date.now();
         document.getElementById('money').innerText = fmt(money);
         document.getElementById('level').innerText = level;
@@ -555,10 +608,44 @@
         
         let tr = document.getElementById('market-trend'); tr.innerText = lastTrend === 'up' ? '📈 ТРЕНД: РОСТ' : '📉 ТРЕНД: КРИЗИС'; tr.className = 'trend ' + (lastTrend === 'up' ? 'trend-up' : 'trend-down');
 
+        // ИНТЕРФЕЙС ОБНОВЛЕННЫХ ПЕСТИЦИДОВ
         const pestTimerEl = document.getElementById('pesticide-timer');
+        const pestCdEl = document.getElementById('pest-cooldown-timer');
+        const pestBtn = document.getElementById('pest-buy-btn');
+        const pestCountEl = document.getElementById('pest-use-count');
+
+        pestCountEl.innerText = `Использовано: ${pesticideDailyUses}/5`;
+
         if (pesticideUntil > now) {
-            let secLeft = Math.ceil((pesticideUntil - now) / 1000); pestTimerEl.innerText = `🧴 Пестициды: ${Math.floor(secLeft/60)}:${String(secLeft%60).padStart(2,'0')}`; pestTimerEl.style.color = '#2ecc71';
-        } else { pestTimerEl.innerText = `🧴 Защита: Выкл`; pestTimerEl.style.color = '#e74c3c'; }
+            let secLeft = Math.ceil((pesticideUntil - now) / 1000); 
+            pestTimerEl.innerText = `🧴 Пестициды: ${Math.floor(secLeft/60)}:${String(secLeft%60).padStart(2,'0')}`; 
+            pestTimerEl.style.color = '#2ecc71';
+            pestCdEl.innerText = "⚠️ Идет распыление...";
+            pestBtn.disabled = true;
+            pestBtn.innerText = "Уже активны";
+        } else {
+            pestTimerEl.innerText = `🧴 Защита: Выкл`; 
+            pestTimerEl.style.color = '#e74c3c';
+            
+            if (pesticideCooldownUntil > now) {
+                let secCdLeft = Math.ceil((pesticideCooldownUntil - now) / 1000);
+                pestCdEl.innerText = `⏳ Ожидание почвы: ${Math.floor(secCdLeft/3600)}ч ${Math.floor((secCdLeft%3600)/60)}м ${secCdLeft%60}с`;
+                pestBtn.disabled = true;
+                pestBtn.innerText = "Земля отдыхает";
+            } else {
+                pestCdEl.innerText = "🟢 Земля готова к обработке";
+                pestBtn.disabled = false;
+                
+                if (pesticideDailyUses >= 5) {
+                    pestBtn.innerText = "Продлить лимит (📺 Реклама)";
+                    pestBtn.style.background = "linear-gradient(#e74c3c, #c0392b)";
+                } else {
+                    let nextCost = PEST_PRICES[pesticideDailyUses];
+                    pestBtn.innerText = `Купить (${nextCost === 0 ? 'Бесплатно' : nextCost.toFixed(2) + '$'})`;
+                    pestBtn.style.background = "linear-gradient(#3498db, #2980b9)";
+                }
+            }
+        }
 
         const dogStatusEl = document.getElementById('dog-status');
         if (dogCharges > 0) { dogStatusEl.innerText = `🐕 Пёс активен (${dogCharges})`; dogStatusEl.style.color = '#f1c40f'; } else { dogStatusEl.innerText = `🐕 Пёс: Не нанят`; dogStatusEl.style.color = '#fff'; }
@@ -576,7 +663,6 @@
         const nowDate = new Date(); document.getElementById('clock').innerText = String(nowDate.getHours()).padStart(2,'0') + ':' + String(nowDate.getMinutes()).padStart(2,'0') + ':' + String(nowDate.getSeconds()).padStart(2,'0');
         document.getElementById('weather-display').innerText = `🌦️ ПОГОДА: ${currentWeather.name}`;
 
-        // РЕНДЕРИНГ МНОГОУРОВНЕВЫХ ДОСТИЖЕНИЙ
         const currentStats = { money: maxScore, tractors: tractorsCount, bugs: statKilledBugs, factory: statProcessedCount, ads: qAds, dog: statDogSaves };
         document.getElementById('achievements-box').innerHTML = Object.keys(ACHIEVEMENT_DB).map(key => {
             let db = ACHIEVEMENT_DB[key]; let lvl = achLevels[key]; let currentVal = currentStats[key]; let isMax = lvl >= 3; let target = isMax ? db.steps[2] : db.steps[lvl]; let pct = isMax ? 100 : Math.min(100, (currentVal / target) * 100);
@@ -587,7 +673,6 @@
                 </div>`;
         }).join('');
 
-        // РЕНДЕРИНГ ДИНАМИЧЕСКИХ КВЕСТОВ И КОНТРАКТОВ
         document.getElementById('quests-container').innerHTML = activeQuests.map((q, idx) => {
             let pct = Math.min(100, (q.current / q.target) * 100);
             let displayCur = q.type === 'sell_money' ? q.current.toFixed(2) : Math.floor(q.current);
@@ -629,17 +714,22 @@
         localStorage.setItem('mx_lc1', cropLevels[1]); localStorage.setItem('mx_lc2', cropLevels[2]); localStorage.setItem('mx_lc3', cropLevels[3]);
         localStorage.setItem('mx_up_stock', upStockLvl); localStorage.setItem('mx_up_fact', upFactLvl); localStorage.setItem('mx_up_fuel', upFuelLvl); localStorage.setItem('mx_fuel', currentFuel);
         localStorage.setItem('mx_bot_shares', JSON.stringify(botShares)); localStorage.setItem('mx_last_ad_time', lastAdTime);
-        localStorage.setItem('mx_pest_until', pesticideUntil); localStorage.setItem('mx_dog_charges', dogCharges);
-        localStorage.setItem('mx_st_bugs', statKilledBugs); localStorage.setItem('mx_st_proc', statProcessedCount); localStorage.setItem('mx_st_dogsaves', statDogSaves);
+        localStorage.setItem('mx_dog_charges', dogCharges);
+        localStorage.setItem('mx_st_bugs', statKilledBugs); localStorage.setItem('mx_st_proc', statProcessedCount); localStorage.setItem('mx_st_dogsaves', statDogSaves); localStorage.setItem('mx_st_qads', qAds);
         localStorage.setItem('mx_ach_lvls', JSON.stringify(achLevels));
-        
-        // Сохранение системы контрактов
         localStorage.setItem('mx_active_quests', JSON.stringify(activeQuests));
+
+        // Сохранение новых параметров пестицидов
+        localStorage.setItem('mx_pest_until', pesticideUntil);
+        localStorage.setItem('mx_pest_cd_until', pesticideCooldownUntil);
+        localStorage.setItem('mx_pest_uses', pesticideDailyUses);
+        localStorage.setItem('mx_pest_date', pesticideLastDate);
     }
 
     window.addEventListener('DOMContentLoaded', function() {
         gridElement = document.getElementById('farm-grid');
-        initQuestsSystem(); // Проверка генерации квестов
+        initQuestsSystem();
+        checkDailyReset();
 
         setInterval(function() {
             const now = Date.now();
@@ -649,8 +739,7 @@
                 if (factoryProgress >= 100) {
                     isFactoryRunning = false; factoryProgress = 0;
                     let speed = getFactorySpeed(); processedStock += speed; statProcessedCount += speed;
-                    progressQuest('factory', speed); // Квест на завод
-                    checkAchievements();
+                    progressQuest('factory', speed); checkAchievements();
                 }
             }
 
