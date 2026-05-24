@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>IDLE FARM EMPIRE</title>
-    <script src="https://crazygames.com"></script>
     <style>
         body { background: linear-gradient(135deg, #111e36 0%, #1c355e 100%); color: white; font-family: Arial, sans-serif; text-align: center; padding: 10px; margin: 0; min-height: 100vh; user-select: none; }
         h1 { font-size: 22px; margin: 5px 0; color: #f1c40f; }
@@ -16,8 +15,7 @@
         .plot:active { transform: translateY(4px); box-shadow: 0 0px 0 transparent; }
         .growing { background: radial-gradient(#d35400, #a04000) !important; border-color: #783000 !important; }
         .ready { background: radial-gradient(#2ecc71, #27ae60) !important; border-color: #1e7e34 !important; }
-        .icon { font-size: 30px; margin-bottom: 2px; }
-        .plot-label { background: rgba(0,0,0,0.6); padding: 1px 5px; border-radius: 8px; font-size: 9px; color: white; font-weight: bold; }
+        .plot-label { background: rgba(0,0,0,0.6); padding: 1px 5px; border-radius: 8px; font-size: 9px; color: white; font-weight: bold; margin-top: 2px; }
         .btn-box { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 15px; }
         button { border: none; color: white; padding: 10px 15px; font-size: 12px; font-weight: bold; border-radius: 10px; cursor: pointer; width: 100%; }
         .upgrade-btn { background: linear-gradient(#2ecc71, #27ae60); box-shadow: 0 3px 0 #1e7e34; }
@@ -28,128 +26,316 @@
         .player-row { color: #5dade2; font-weight: bold; background: rgba(93,173,226,0.2); border-radius: 4px; padding: 3px 5px; }
         #boost-timer { color: #e74c3c; font-weight: bold; animation: blink 1s infinite; }
         @keyframes blink { 50% { opacity: 0.5; } }
+        @keyframes fillRing {
+            from { stroke-dashoffset: 188.5; }
+            to   { stroke-dashoffset: 0; }
+        }
+        .ring-wrap { position: relative; width: 68px; height: 68px; display: flex; align-items: center; justify-content: center; }
+        .ring-wrap .ring-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 22px; pointer-events: none; line-height: 1; }
+        .countdown { font-size: 10px; font-weight: bold; color: #ecf0f1; background: rgba(0,0,0,0.55); padding: 1px 5px; border-radius: 8px; margin-top: 2px; }
     </style>
 </head>
 <body>
 
-    <h1>🚜 IDLE FARM EMPIRE: TYCOON 🌾</h1>
-    
-    <div class="stats-container">
-        <div class="stat-box">💰 <span id="money">0</span> $</div>
-        <div class="stat-box">⭐ Уровень <span id="level">1</span></div>
-        <div class="stat-box">🌱 СЕМЕНА: <span id="seeds">30</span></div>
+<h1>🚜 IDLE FARM EMPIRE: TYCOON 🌾</h1>
+
+<div class="stats-container">
+    <div class="stat-box">💰 <span id="money">0</span> $</div>
+    <div class="stat-box">⭐ Уровень <span id="level">1</span></div>
+    <div class="stat-box">🌱 СЕМЕНА: <span id="seeds">30</span></div>
+</div>
+
+<div class="main-layout">
+    <div class="left-panel">
+        <div class="panel-title">🏆 ГЛОБАЛЬНЫЙ ЛИДЕРБОРД</div>
+        <div id="leaderboard"></div>
+        <div class="panel-title" style="margin-top:15px;">📊 Статистика фермы</div>
+        <div>Всего земельных участков: 9</div>
+        <div>Посажено моркови: <span id="stat-carrot">0</span></div>
+        <div>Посажено помидоров: <span id="stat-tomato">0</span></div>
+        <div>Посажено арбузов: <span id="stat-watermelon">0</span></div>
     </div>
 
-    <div class="main-layout">
-        <div class="left-panel">
-            <div class="panel-title">🏆 ГЛОБАЛЬНЫЙ ЛИДЕРБОРД</div>
-            <div id="leaderboard"></div>
-            <div class="panel-title" style="margin-top: 15px;">📊 Статистика фермы</div>
-            <div>Всего земельных участков: 9</div>
-            <div>Посажено моркови: <span id="stat-carrot">0</span></div>
-            <div>Посажено помидоров: <span id="stat-tomato">0</span></div>
-            <div>Посажено арбузов: <span id="stat-watermelon">0</span></div>
+    <div>
+        <div class="grid" id="farm-grid"></div>
+        <div class="btn-box">
+            <button class="upgrade-btn" onclick="buyAutoTractor()">🛒 КУПИТЬ ТРАКТОР (Стоимость: <span id="tractor-cost">50</span> $)</button>
+            <button class="ad-btn" onclick="watchAdReward()">📺 СМОТРЕТЬ РЕКЛАМУ (+30 семян & +150$)</button>
         </div>
-
-        <div>
-            <div class="grid" id="farm-grid"></div>
-            <div class="btn-box">
-                <button class="upgrade-btn" onclick="buyAutoTractor()">🛒 КУПИТЬ ТРАКТОР (Стоимость: <span id="tractor-cost">50</span> $)</button>
-                <button class="ad-btn" onclick="watchAdReward()">📺 СМОТРЕТЬ РЕКЛАМУ (+30 семян, +150$, Буст x2)</button>
-            </div>
-            <div id="tractor-status" style="font-size:12px; margin-top:10px; font-weight:bold;">Активных тракторов: 0 (+0 $/сек)</div>
-            <div id="boost-status" style="font-size:12px; color:#e74c3c; margin-top:5px;"></div>
-        </div>
-
-        <div class="right-panel">
-            <div class="panel-title">🏪 РЫНОК СЕМЯН</div>
-            <p style="font-size:11px; color:#bdc3c7; margin:0 0 8px 0; text-align:center;">Цены обновляются каждые 10 секунд!</p>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span>Текущая культура: <b id="market-crop-name">МОРКОВЬ 🥕</b></span>
-                <span>Цена: <b id="market-price" style="color:#2ecc71;">5$</b></span>
-            </div>
-            <div style="display:flex; gap:5px;">
-                <button class="market-btn" onclick="dealSeeds('buy')">КУПИТЬ +10</button>
-                <button class="market-btn" style="background:linear-gradient(#95a5a6, #7f8c8d);" onclick="dealSeeds('sell')">ПРОДАТЬ -10</button>
-            </div>
-            <div id="night-warning" style="margin-top:15px; color:#f39c12; text-align:center; font-weight:bold; font-size:11px;"></div>
-        </div>
+        <div id="tractor-status" style="font-size:12px; margin-top:10px; font-weight:bold;">Активных тракторов: 0 (+0 $/сек)</div>
+        <div id="boost-status" style="font-size:12px; color:#e74c3c; margin-top:5px;"></div>
     </div>
 
-    <script>
-        let money = parseInt(localStorage.getItem('f_money')) || 0;
-        let level = parseInt(localStorage.getItem('f_level')) || 1;
-        let seeds = localStorage.getItem('f_seeds') !== null ? parseInt(localStorage.getItem('f_seeds')) : 30;
-        let tractorsCount = parseInt(localStorage.getItem('f_tractors')) || 0;
-        let tractorCost = parseInt(localStorage.getItem('f_t_cost')) || 50;
-        let boostTimeLeft = parseInt(localStorage.getItem('f_boost')) || 0;
+    <div class="right-panel">
+        <div class="panel-title">🏪 РЫНОК СЕМЯН</div>
+        <p style="font-size:11px; color:#bdc3c7; margin:0 0 8px 0; text-align:center;">Цены обновляются каждые 10 секунд!</p>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <span>Текущая культура: <b id="market-crop-name">МОРКОВЬ 🥕</b></span>
+            <span>Цена: <b id="market-price" style="color:#2ecc71;">5$</b></span>
+        </div>
+        <div style="display:flex; gap:5px;">
+            <button class="market-btn" onclick="dealSeeds('buy')">КУПИТЬ +10 СЕМЯН</button>
+            <button class="market-btn" style="background:linear-gradient(#95a5a6,#7f8c8d);" onclick="dealSeeds('sell')">ПРОДАЖА -10 СЕМЯН</button>
+        </div>
+        <div id="night-warning" style="margin-top:15px; color:#f39c12; text-align:center; font-weight:bold; font-size:11px;"></div>
+    </div>
+</div>
 
-        let sCarrot = parseInt(localStorage.getItem('s_car')) || 0;
-        let sTomato = parseInt(localStorage.getItem('s_tom')) || 0;
-        let sWatermelon = parseInt(localStorage.getItem('s_wat')) || 0;
+<script>
+    let money    = parseInt(localStorage.getItem('v4_money'))       || 0;
+    let level    = parseInt(localStorage.getItem('v4_level'))       || 1;
+    let seeds    = localStorage.getItem('v4_seeds') !== null ? parseInt(localStorage.getItem('v4_seeds')) : 30;
+    let tractorsCount = parseInt(localStorage.getItem('v4_tractors'))    || 0;
+    let tractorCost   = parseInt(localStorage.getItem('v4_tractor_cost')) || 50;
+    let boostTimeLeft = parseInt(localStorage.getItem('v4_boost_time'))  || 0;
 
-        let bots = [{name:"Farmer_John99", money:450}, {name:"CryptoCowboy", money:120}, {name:"AgroKing_UA", money:30}, {name:"ElonMusk_Farm", money:5}];
-        let currentMarketPrice = 5;
-        const plots = Array(9).fill(null).map(() => ({ status: 'empty' }));
-        const gridElement = document.getElementById('farm-grid');
+    let sCarrot    = parseInt(localStorage.getItem('s_carrot'))    || 0;
+    let sTomato    = parseInt(localStorage.getItem('s_tomato'))    || 0;
+    let sWatermelon= parseInt(localStorage.getItem('s_watermelon'))|| 0;
 
-        function getCropData() {
-            if (level >= 5) return { id: 3, icon: '🍉', name: 'АРБУЗ', reward: 60, time: 5000 };
-            if (level >= 3) return { id: 2, icon: '🍅', name: 'ПОМИДОР', reward: 30, time: 3500 };
-            return { id: 1, icon: '🥕', name: 'МОРКОВЬ', reward: 12, time: 2000 };
+    const bots = [
+        { name: "Farmer_John99",  money: 450 },
+        { name: "CryptoCowboy",   money: 120 },
+        { name: "AgroKing_UA",    money: 30  },
+        { name: "ElonMusk_Farm",  money: 5   }
+    ];
+
+    let currentMarketPrice = 5;
+    const plots = Array(9).fill(null).map(() => ({ status: 'empty', startTime: 0, duration: 0 }));
+    const gridElement = document.getElementById('farm-grid');
+
+    /* ---- SVG soil icon ---- */
+    const SOIL_SVG = `<svg width="54" height="46" viewBox="0 0 44 38" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="22" cy="31" rx="20" ry="7" fill="#3d1c0e"/>
+      <path d="M2 31 Q9 16 22 14 Q35 16 42 31 Z" fill="#8B4513"/>
+      <path d="M5 28 Q14 20 22 19 Q30 20 39 28" fill="none" stroke="#6b2d0a" stroke-width="1.8" opacity="0.6"/>
+      <circle cx="13" cy="25" r="2"   fill="#2a0e04" opacity="0.75"/>
+      <circle cx="22" cy="23" r="1.4" fill="#2a0e04" opacity="0.75"/>
+      <circle cx="31" cy="25" r="1.8" fill="#2a0e04" opacity="0.75"/>
+      <circle cx="18" cy="27.5" r="1.1" fill="#2a0e04" opacity="0.6"/>
+      <circle cx="27" cy="27.5" r="1.3" fill="#2a0e04" opacity="0.6"/>
+    </svg>`;
+
+    /* ---- progress ring ---- */
+    function getProgressRing(elapsed, duration, icon) {
+        const C = 188.5; // 2π×30
+        const delay = -Math.min(elapsed, duration);
+        return `<div class="ring-wrap">
+            <svg width="68" height="68" viewBox="0 0 70 70">
+                <circle cx="35" cy="35" r="30" fill="rgba(0,0,0,0.25)" stroke="#5c2c16" stroke-width="7"/>
+                <circle cx="35" cy="35" r="30" fill="none" stroke="#2ecc71" stroke-width="7"
+                    stroke-dasharray="${C}" stroke-dashoffset="${C}"
+                    transform="rotate(-90 35 35)" stroke-linecap="round"
+                    style="animation: fillRing ${duration}ms linear ${delay}ms forwards;"/>
+            </svg>
+            <span class="ring-icon">${icon}</span>
+        </div>`;
+    }
+
+    function formatTimeLeft(ms) {
+        const s = Math.ceil(ms / 1000);
+        if (s <= 0) return '0s';
+        if (s < 60) return s + 's';
+        return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+    }
+
+    function getCropData() {
+        if (level >= 5) return { id: 3, icon: '🍉', name: 'АРБУЗ',    reward: 60, time: 5000 };
+        if (level >= 3) return { id: 2, icon: '🍅', name: 'ПОМИДОР',  reward: 30, time: 3500 };
+        return             { id: 1, icon: '🥕', name: 'МОРКОВЬ',   reward: 12, time: 2000 };
+    }
+
+    function updateUI() {
+        document.getElementById('money').innerText = money;
+        document.getElementById('level').innerText = level;
+        document.getElementById('seeds').innerText = seeds;
+        document.getElementById('tractor-cost').innerText = tractorCost;
+
+        let currentMultiplier = boostTimeLeft > 0 ? 4 : 2;
+        document.getElementById('tractor-status').innerText =
+            `Активных тракторов: ${tractorsCount} (+${tractorsCount * currentMultiplier} $/сек)`;
+
+        if (boostTimeLeft > 0) {
+            document.getElementById('boost-status').innerHTML =
+                `🚀 БУСТ x2 активен! Осталось: <span id="boost-timer">${Math.ceil(boostTimeLeft/1000)}s</span>`;
+        } else {
+            document.getElementById('boost-status').innerHTML = '';
         }
 
-        function updateUI() {
-            document.getElementById('money').innerText = money;
-            document.getElementById('level').innerText = level;
-            document.getElementById('seeds').innerText = seeds;
-            document.getElementById('tractor-cost').innerText = tractorCost;
-            let mult = boostTimeLeft > 0 ? 4 : 2;
-            document.getElementById('tractor-status').innerText = `Активных тракторов: ${tractorsCount} (+${tractorsCount * mult} $/сек)`;
-            document.getElementById('stat-carrot').innerText = sCarrot;
-            document.getElementById('stat-tomato').innerText = sTomato;
-            document.getElementById('stat-watermelon').innerText = sWatermelon;
-            let crop = getCropData();
-            document.getElementById('market-crop-name').innerText = crop.name + " " + crop.icon;
-            let hours = new Date().getHours();
-            document.getElementById('night-warning').innerText = (hours >= 0 && hours < 6) ? "🌙 НОЧЬ: Тракторы спят до 06:00 утра!" : "☀️ ДЕНЬ: Тракторы работают.";
-            renderLeaderboard();
+        document.getElementById('stat-carrot').innerText    = sCarrot;
+        document.getElementById('stat-tomato').innerText    = sTomato;
+        document.getElementById('stat-watermelon').innerText = sWatermelon;
+
+        const crop = getCropData();
+        document.getElementById('market-crop-name').innerText = crop.name + ' ' + crop.icon;
+        document.getElementById('market-price').innerText = currentMarketPrice + '$';
+
+        renderGrid();
+        renderLeaderboard();
+        checkNightBonus();
+    }
+
+    function renderGrid() {
+        const now = Date.now();
+        gridElement.innerHTML = '';
+        plots.forEach((plot, i) => {
+            const div = document.createElement('div');
+            div.className = 'plot';
+
+            if (plot.status === 'empty') {
+                div.innerHTML = SOIL_SVG + `<div class="plot-label">ПОСАДИТЬ</div>`;
+                div.onclick = () => plantSeed(i);
+
+            } else if (plot.status === 'growing') {
+                const elapsed  = now - plot.startTime;
+                const timeLeft = Math.max(0, plot.duration - elapsed);
+                div.className += ' growing';
+                div.innerHTML = getProgressRing(elapsed, plot.duration, plot.icon)
+                    + `<div class="countdown">${formatTimeLeft(timeLeft)}</div>`;
+                div.onclick = () => {};
+
+            } else if (plot.status === 'ready') {
+                div.className += ' ready';
+                div.innerHTML = `<div style="font-size:34px;">${plot.icon}</div>
+                    <div class="plot-label">СОБРАТЬ +${plot.reward}$</div>`;
+                div.onclick = () => harvest(i);
+            }
+
+            gridElement.appendChild(div);
+        });
+    }
+
+    function plantSeed(i) {
+        if (seeds <= 0) { alert('Нет семян! Купите на рынке.'); return; }
+        const crop = getCropData();
+        seeds--;
+        if (crop.id === 1) sCarrot++;
+        if (crop.id === 2) sTomato++;
+        if (crop.id === 3) sWatermelon++;
+        plots[i] = { status: 'growing', icon: crop.icon, reward: crop.reward, duration: crop.time, startTime: Date.now() };
+        save(); updateUI();
+    }
+
+    function harvest(i) {
+        money += plots[i].reward;
+        level  = Math.max(1, Math.floor(money / 100) + 1);
+        plots[i] = { status: 'empty', startTime: 0, duration: 0 };
+        save(); updateUI();
+    }
+
+    function buyAutoTractor() {
+        if (money < tractorCost) { alert('Недостаточно денег!'); return; }
+        money -= tractorCost;
+        tractorsCount++;
+        tractorCost = Math.floor(tractorCost * 1.8);
+        save(); updateUI();
+    }
+
+    function watchAdReward() {
+        seeds  += 30;
+        money  += 150;
+        boostTimeLeft = 30000;
+        save(); updateUI();
+    }
+
+    function dealSeeds(type) {
+        if (type === 'buy') {
+            const cost = currentMarketPrice * 10;
+            if (money < cost) { alert('Недостаточно денег!'); return; }
+            money -= cost; seeds += 10;
+        } else {
+            if (seeds < 10) { alert('Недостаточно семян!'); return; }
+            seeds -= 10; money += currentMarketPrice * 8;
+        }
+        save(); updateUI();
+    }
+
+    function renderLeaderboard() {
+        const all = [...bots, { name: 'ВЫ', money }]
+            .sort((a, b) => b.money - a.money);
+        const medals = ['🥇','🥈','🥉'];
+        document.getElementById('leaderboard').innerHTML = all.map((p, i) => {
+            const isPlayer = p.name === 'ВЫ';
+            const medal = medals[i] || (i + 1) + '.';
+            return `<div class="leader-item ${isPlayer ? 'player-row' : ''}">
+                <span>${medal} ${p.name}</span>
+                <span>${p.money}$</span>
+            </div>`;
+        }).join('');
+    }
+
+    function checkNightBonus() {
+        const h = new Date().getHours();
+        const el = document.getElementById('night-warning');
+        if (h >= 22 || h < 6) {
+            el.innerText = '🌙 НОЧНОЙ БОНУС! Цены выше на 20%';
+            currentMarketPrice = Math.floor(currentMarketPrice * 1.2);
+        } else {
+            el.innerText = '';
+        }
+    }
+
+    function save() {
+        localStorage.setItem('v4_money',       money);
+        localStorage.setItem('v4_level',       level);
+        localStorage.setItem('v4_seeds',       seeds);
+        localStorage.setItem('v4_tractors',    tractorsCount);
+        localStorage.setItem('v4_tractor_cost',tractorCost);
+        localStorage.setItem('v4_boost_time',  boostTimeLeft);
+        localStorage.setItem('s_carrot',       sCarrot);
+        localStorage.setItem('s_tomato',       sTomato);
+        localStorage.setItem('s_watermelon',   sWatermelon);
+    }
+
+    /* ---- main game loop (1 sec) ---- */
+    setInterval(() => {
+        const now = Date.now();
+
+        // tractor passive income
+        if (tractorsCount > 0) {
+            const mult = boostTimeLeft > 0 ? 4 : 2;
+            money += tractorsCount * mult;
+            level  = Math.max(1, Math.floor(money / 100) + 1);
         }
 
-        function renderLeaderboard() {
-            let list = [...bots, { name: "ВЫ (Игрок)", money: money }].sort((a, b) => b.money - a.money);
-            let html = "";
-            list.forEach((user, index) => {
-                let isP = user.name.includes("ВЫ");
-                html += `<div class="leader-item ${isP ? 'player-row' : ''}"><span>#${index + 1} ${user.name}</span><span>${user.money} $</span></div>`;
+        // boost timer
+        if (boostTimeLeft > 0) boostTimeLeft = Math.max(0, boostTimeLeft - 1000);
+
+        // auto-ready check
+        plots.forEach((p, i) => {
+            if (p.status === 'growing' && now - p.startTime >= p.duration) {
+                plots[i].status = 'ready';
+            }
+        });
+
+        // auto-harvest with tractors
+        if (tractorsCount > 0) {
+            plots.forEach((p, i) => {
+                if (p.status === 'ready') harvest(i);
             });
-            document.getElementById('leaderboard').innerHTML = html;
-        }
-
-        function renderGrid() {
-            gridElement.innerHTML = '';
-            let crop = getCropData();
-            plots.forEach((plot, index) => {
-                const div = document.createElement('div');
-                div.className = 'plot';
-                if (plot.status === 'empty') {
-                    div.innerHTML = `<div class="icon">🪱</div><span class="plot-label" style="color:#f1c40f;">ПОСАДИТЬ</span>`;
-                } else if (plot.status === 'growing') {
-                    div.innerHTML = '<div class="icon">🌱</div><span class="plot-label">РАСТЕТ</span>';
-                    div.classList.add('growing');
-                } else if (plot.status === 'ready') {
-                    div.innerHTML = `<div class="icon">${crop.icon}</div><span class="plot-label" style="color:#2ecc71;">СОБРАТЬ</span>`;
-                    div.classList.add('ready');
-                }
-                div.onclick = () => handlePlotClick(index);
-                gridElement.appendChild(div);
+            // auto-plant
+            plots.forEach((p, i) => {
+                if (p.status === 'empty' && seeds > 0) plantSeed(i);
             });
         }
 
-        function handlePlotClick(index) {
-            let crop = getCropData();
-            if (plots[index].status === 'empty') {
-                if (seeds <= 0) return alert('Закончились семена!');
-                seeds--;
-                if (crop.id === 1) sCarrot++;
-                if (crop.id === 2) sTomato++;
+        // market price fluctuation every 10s
+        if (Math.floor(now / 1000) % 10 === 0) {
+            currentMarketPrice = Math.floor(Math.random() * 10) + 3;
+        }
+
+        // bot money growth
+        bots.forEach(b => b.money += Math.floor(Math.random() * 5) + 1);
+
+        save();
+        updateUI();
+    }, 1000);
+
+    /* ---- re-render every 100ms for smooth ring countdown ---- */
+    setInterval(() => renderGrid(), 100);
+
+    // init
+    updateUI();
+</script>
+</body>
+</html>
