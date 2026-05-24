@@ -86,9 +86,7 @@
 </div>
 
 <script>
-window.addEventListener('DOMContentLoaded', function() {
-
-    // ── Constants ──────────────────────────────────────────────────────────────
+    // ── Константы ──────────────────────────────────────────────────────────────
     const FREE_PLOTS        = 3;
     const PLOT_UNLOCK_COSTS = [0, 0, 0, 100, 200, 700, 1200, 1700, 2200];
     const HARVEST_REWARD    = 0.002;
@@ -98,7 +96,7 @@ window.addEventListener('DOMContentLoaded', function() {
     const SEED_BUY_PRICE    = 0.10;
     const MARKET_PRICES     = [0.0003, 0.0004, 0.0005, 0.0006, 0.0008, 0.0010];
 
-    // ── State ──────────────────────────────────────────────────────────────────
+    // ── Переменные состояния (Глобальные) ──────────────────────────────────────
     let money         = parseFloat(localStorage.getItem('v5_money'))        || 0;
     let level         = parseInt(localStorage.getItem('v5_level'))          || 1;
     let seeds         = localStorage.getItem('v5_seeds') !== null ? parseInt(localStorage.getItem('v5_seeds')) : 30;
@@ -114,7 +112,6 @@ window.addEventListener('DOMContentLoaded', function() {
     let sWatermelon = parseInt(localStorage.getItem('s_watermelon')) || 0;
 
     maxScore = Math.max(maxScore, money);
-
     let currentMarketPrice = MARKET_PRICES[2];
 
     const bots = [
@@ -128,9 +125,9 @@ window.addEventListener('DOMContentLoaded', function() {
         status: 'empty', startTime: 0, duration: 0, icon: '', reward: 0
     }));
 
-    const gridElement = document.getElementById('farm-grid');
+    let gridElement;
 
-    // ── Helpers ────────────────────────────────────────────────────────────────
+    // ── Вспомогательные функции ────────────────────────────────────────────────
     function fmt(v) {
         const n = parseFloat(v) || 0;
         if (n >= 1000) return n.toFixed(2);
@@ -177,7 +174,7 @@ window.addEventListener('DOMContentLoaded', function() {
         </div>`;
     }
 
-    // ── Render grid ────────────────────────────────────────────────────────────
+    // ── Отрендерить сетку фермы ──────────────────────────────────────────────────
     function renderGrid() {
         if (!gridElement) return;
         const now = Date.now();
@@ -217,7 +214,7 @@ window.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ── Actions ────────────────────────────────────────────────────────────────
+    // ── Игровые действия (Глобальные функции) ───────────────────────────────
     function unlockPlot(i) {
         const cost = PLOT_UNLOCK_COSTS[i];
         if (money < cost) { alert('Недостаточно денег! Нужно ' + cost + '$'); return; }
@@ -274,7 +271,7 @@ window.addEventListener('DOMContentLoaded', function() {
         save(); updateUI();
     }
 
-    // ── UI ─────────────────────────────────────────────────────────────────────
+    // ── Обновление интерфейса ─────────────────────────────────────────────────
     function updateUI() {
         document.getElementById('money').innerText  = fmt(money);
         document.getElementById('level').innerText  = level;
@@ -347,52 +344,55 @@ window.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('s_watermelon',    sWatermelon);
     }
 
-    // ── Game loop ──────────────────────────────────────────────────────────────
-    setInterval(function() {
-        const now = Date.now();
+    // ── Старт игры после загрузки DOM ──────────────────────────────────────────
+    window.addEventListener('DOMContentLoaded', function() {
+        gridElement = document.getElementById('farm-grid');
+        
+        // Главный игровой цикл (1 раз в секунду)
+        setInterval(function() {
+            const now = Date.now();
 
-        if (tractorsCount > 0) {
-            money += tractorsCount * TRACTOR_INCOME_PM / 60;
-            maxScore = Math.max(maxScore, money);
-        }
-
-        plots.forEach(function(p, i) {
-            if (p.status === 'growing' && now - p.startTime >= p.duration) {
-                plots[i].status = 'ready';
+            if (tractorsCount > 0) {
+                money += tractorsCount * TRACTOR_INCOME_PM / 60;
+                maxScore = Math.max(maxScore, money);
             }
-        });
 
-        if (tractorsCount > 0) {
             plots.forEach(function(p, i) {
-                if (p.status === 'ready' && unlockedPlots[i]) harvest(i);
-            });
-            plots.forEach(function(p, i) {
-                if (p.status === 'empty' && unlockedPlots[i]) {
-                    if (i < FREE_PLOTS || seeds > 0) plantSeed(i);
+                if (p.status === 'growing' && now - p.startTime >= p.duration) {
+                    plots[i].status = 'ready';
                 }
             });
-        }
 
-        if (Math.floor(now / 1000) % 10 === 0) {
-            const h = new Date().getHours();
-            const base = MARKET_PRICES[Math.floor(Math.random() * MARKET_PRICES.length)];
-            currentMarketPrice = (h >= 22 || h < 6) ? parseFloat((base * 1.2).toFixed(5)) : base;
-        }
+            if (tractorsCount > 0) {
+                plots.forEach(function(p, i) {
+                    if (p.status === 'ready' && unlockedPlots[i]) harvest(i);
+                });
+                plots.forEach(function(p, i) {
+                    if (p.status === 'empty' && unlockedPlots[i]) {
+                        if (i < FREE_PLOTS || seeds > 0) plantSeed(i);
+                    }
+                });
+            }
 
-        bots.forEach(function(b) { b.money += parseFloat((Math.random() * 0.001).toFixed(5)); });
+            if (Math.floor(now / 1000) % 10 === 0) {
+                const h = new Date().getHours();
+                const base = MARKET_PRICES[Math.floor(Math.random() * MARKET_PRICES.length)];
+                currentMarketPrice = (h >= 22 || h < 6) ? parseFloat((base * 1.2).toFixed(5)) : base;
+            }
 
-        level = money >= 60 ? 5 : money >= 20 ? 3 : 1;
-        save();
+            bots.forEach(function(b) { b.money += parseFloat((Math.random() * 0.001).toFixed(5)); });
+
+            level = money >= 60 ? 5 : money >= 20 ? 3 : 1;
+            save();
+            updateUI();
+        }, 1000);
+
+        // Плавная отрисовка таймеров и колец (10 раз в секунду)
+        setInterval(function() { renderGrid(); }, 100);
+
+        // Первичный запуск интерфейса
         updateUI();
-    }, 1000);
-
-    // smooth ring re-render
-    setInterval(function() { renderGrid(); }, 100);
-
-    // first render
-    updateUI();
-
-}); // end DOMContentLoaded
+    });
 </script>
 </body>
 </html>
