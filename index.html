@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>IDLE FARM EMPIRE: ANTICHEAT EDITION</title>
+    <title>IDLE FARM EMPIRE: ACHIEVEMENTS UNLOCKED</title>
     <style>
         body { background: linear-gradient(135deg, #111e36 0%, #1c355e 100%); color: white; font-family: Arial, sans-serif; text-align: center; padding: 10px; margin: 0; min-height: 100vh; user-select: none; }
         h1 { font-size: 20px; margin: 5px 0; color: #f1c40f; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
@@ -37,6 +37,8 @@
         .market-btn  { background: linear-gradient(#e67e22, #d35400); box-shadow: 0 3px 0 #a04000; }
         .ad-btn      { background: linear-gradient(#e74c3c, #c0392b); box-shadow: 0 3px 0 #962d22; }
         .factory-btn { background: linear-gradient(#9b59b6, #8e44ad); box-shadow: 0 3px 0 #6d3284; }
+        .pest-btn    { background: linear-gradient(#3498db, #2980b9); box-shadow: 0 3px 0 #21618c; }
+        .dog-btn     { background: linear-gradient(#f39c12, #d35400); box-shadow: 0 3px 0 #a04000; }
         
         .panel-title { font-weight: bold; color: #f1c40f; border-bottom: 1px solid #f1c40f; padding-bottom: 3px; margin-bottom: 6px; font-size: 13px; text-align: center; }
         .leader-item { display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px dashed rgba(255,255,255,0.1); align-items: center; }
@@ -48,11 +50,16 @@
         .countdown { font-size: 9px; font-weight: bold; color: #ecf0f1; background: rgba(0,0,0,0.55); padding: 1px 4px; border-radius: 6px; margin-top: 2px; }
         
         .weather-box { font-size: 13px; font-weight: bold; background: rgba(52, 152, 219, 0.3); padding: 6px; border-radius: 8px; border: 1px solid #3498db; margin-bottom: 8px; text-align: center; width: 316px; box-sizing: border-box; }
+        .pest-status-box { font-size: 11px; margin-bottom: 6px; background: rgba(46, 204, 113, 0.15); padding: 4px; border-radius: 6px; width: 316px; box-sizing: border-box; border: 1px dashed #2ecc71; display: flex; justify-content: space-around; }
+
         .quest-item { background: rgba(255,255,255,0.05); padding: 4px; border-radius: 5px; margin-bottom: 4px; font-size: 10px; }
         .quest-done { border-left: 3px solid #2ecc71; background: rgba(46, 204, 113, 0.1); }
-        .badge-grid { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
-        .badge { font-size: 16px; background: #34495e; padding: 2px 5px; border-radius: 5px; cursor: help; opacity: 0.2; }
-        .badge.unlocked { opacity: 1; background: #d35400; border: 1px solid #f1c40f; }
+        
+        /* Стили для новых достижений */
+        .achieve-container { display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto; padding-right: 2px; }
+        .achieve-row { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 5px; font-size: 10px; }
+        .achieve-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 2px; }
+        .achieve-badge { font-size: 11px; }
         
         .progress-bar { background: #34495e; border-radius: 6px; overflow: hidden; height: 12px; margin: 4px 0; position: relative; }
         .progress-fill { background: #2ecc71; height: 100%; width: 0%; transition: width 0.3s; }
@@ -84,15 +91,11 @@
         <div class="panel-title">🏆 ТОП ФЕРМЕРОВ</div>
         <div id="leaderboard"></div>
         
-        <div class="panel-title" style="margin-top:10px;">🏅 ДОСТИЖЕНИЯ</div>
-        <div class="badge-grid">
-            <span class="badge" id="badge-first-money" title="Заработать первые $0.10">💵</span>
-            <span class="badge" id="badge-tractor-5" title="Купить 5 тракторов">🚜</span>
-            <span class="badge" id="badge-rich" title="Стать богачом ($100)">👑</span>
-            <span class="badge" id="badge-watermelon" title="Посадить арбуз">🍉</span>
-        </div>
+        <div class="panel-title" style="margin-top:10px;">🏅 МНОГОУРОВНЕВЫЕ ДОСТИЖЕНИЯ</div>
+        <div class="achieve-container" id="achievements-box">
+            </div>
 
-        <div class="panel-title">📦 СКЛАД СЫРЬЯ</div>
+        <div class="panel-title" style="margin-top:10px;">📦 СКЛАД СЫРЬЯ</div>
         <div class="progress-bar"><div class="progress-fill" id="stock-bar"></div><div class="progress-text" id="stock-text">0/50</div></div>
         <div>🥕 Морковь: <span id="inv-carrot">0</span></div>
         <div>🍅 Помидоры: <span id="inv-tomato">0</span></div>
@@ -106,6 +109,12 @@
 
     <div style="display:flex; flex-direction:column; align-items:center;">
         <div class="weather-box" id="weather-display">☀️ ПОГОДА: Загрузка...</div>
+        
+        <div class="pest-status-box">
+            <span id="pesticide-timer">🧴 Защита: Выкл</span>
+            <span id="dog-status">🐕 Пёс: Не нанят</span>
+        </div>
+
         <div class="grid" id="farm-grid"></div>
         
         <div class="btn-box">
@@ -132,6 +141,16 @@
         
         <div style="margin-top:6px; padding:4px; background:rgba(231,76,60,0.15); border-radius:6px; text-align:center;">
             🌱 10 СЕМЯН = <b style="color:#e74c3c;">0.10$</b> <button class="market-btn" style="width:auto; padding:2px 6px; font-size:10px; margin-left:5px;" onclick="buySeeds()">КУПИТЬ</button>
+        </div>
+
+        <div class="panel-title" style="margin-top:10px;">🛡️ ЗАЩИТА ОТ ЖУКОВ</div>
+        <div class="up-row">
+            <span>🧴 Пестициды (1 час)</span>
+            <button class="pest-btn" onclick="buyPesticides()">Купить ($0.20)</button>
+        </div>
+        <div class="up-row">
+            <span>🐕 Пёс-Охотник (Ур. 5)</span>
+            <button id="dog-buy-btn" class="dog-btn" onclick="buyDog()">Купить ($15.0)</button>
         </div>
 
         <div class="panel-title" style="margin-top:10px;">🛠️ АПГРЕЙДЫ ФЕРМЫ</div>
@@ -187,18 +206,68 @@
     let qTractors = parseInt(localStorage.getItem('mx_qt')) || 0;
     let qRewardClaimed = JSON.parse(localStorage.getItem('mx_qclaim')) || [false, false, false];
 
+    let pesticideUntil = parseInt(localStorage.getItem('mx_pest_until')) || 0;
+    let dogCharges = parseInt(localStorage.getItem('mx_dog_charges')) || 0;
+
+    // СТАТИСТИКА ДЛЯ СИСТЕМЫ ДОСТИЖЕНИЙ
+    let statKilledBugs = parseInt(localStorage.getItem('mx_st_bugs')) || 0;
+    let statProcessedCount = parseInt(localStorage.getItem('mx_st_proc')) || 0;
+    let statDogSaves = parseInt(localStorage.getItem('mx_st_dogsaves')) || 0;
+
+    // УРОВНИ ДОСТИЖЕНИЙ ИЗ ПАМЯТИ
+    let achLevels = JSON.parse(localStorage.getItem('mx_ach_lvls')) || {
+        money: 0, tractors: 0, bugs: 0, factory: 0, ads: 0, dog: 0
+    };
+
+    // БАЗА ДАННЫХ ДЛЯ МНОГОУРОВНЕВЫХ ДОСТИЖЕНИЙ
+    const ACHIEVEMENT_DB = {
+        money: {
+            title: "💵 Капиталист",
+            icon: ["🥉", "🥈", "🥇", "👑"],
+            steps: [1.0, 50.0, 500.0],
+            rewards: { money: [0.5, 5.0, 50.0], seeds: [10, 30, 100] }
+        },
+        tractors: {
+            title: "🚜 Тракторист",
+            icon: ["🥉", "🥈", "🥇", "👑"],
+            steps: [1, 5, 12],
+            rewards: { money: [0.2, 2.0, 15.0], seeds: [5, 20, 50] }
+        },
+        bugs: {
+            title: "🐛 Дезинсектор",
+            icon: ["🥉", "🥈", "🥇", "👑"],
+            steps: [3, 15, 50],
+            rewards: { money: [0.3, 3.0, 20.0], seeds: [10, 25, 60] }
+        },
+        factory: {
+            title: "🥫 Директор завода",
+            icon: ["🥉", "🥈", "🥇", "👑"],
+            steps: [10, 100, 500],
+            rewards: { money: [0.5, 4.0, 30.0], seeds: [10, 30, 80] }
+        },
+        ads: {
+            title: "📺 Медиа-магнат",
+            icon: ["🥉", "🥈", "🥇", "👑"],
+            steps: [2, 10, 35],
+            rewards: { money: [1.0, 5.0, 25.0], seeds: [15, 40, 100] }
+        },
+        dog: {
+            title: "🐕 Собачник",
+            icon: ["🥉", "🥈", "🥇", "👑"],
+            steps: [5, 20, 60],
+            rewards: { money: [2.0, 10.0, 40.0], seeds: [10, 50, 120] }
+        }
+    };
+
     let currentWeather = WEATHER_TYPES[3];
     let marketPrices = { 1: 0.0005, 2: 0.002, 3: 0.010, processed: 0.050 };
     let lastTrend = 'up';
     let factoryProgress = 0;
     let isFactoryRunning = false;
-
-    // Античит-переменные для рекламы
     let lastAdTime = parseInt(localStorage.getItem('mx_last_ad_time')) || 0;
-    const AD_COOLDOWN = 30000; // Кулдаун рекламы: 30 секунд
+    const AD_COOLDOWN = 30000;
 
     let botShares = JSON.parse(localStorage.getItem('mx_bot_shares')) || [0, 0, 0];
-
     const bots = [
         { name: "AgroGamer_UA", money: 12.50, baseIncome: 0.01 },
         { name: "CryptoCowboy", money: 3.40, baseIncome: 0.005 },
@@ -243,6 +312,62 @@
         if (level >= 5) return { type: 3, icon: '🍉', time: BASE_TIMES[3] * currentWeather.speed };
         if (level >= 3) return { type: 2, icon: '🍅', time: BASE_TIMES[2] * currentWeather.speed };
         return                 { type: 1, icon: '🥕', time: BASE_TIMES[1] * currentWeather.speed };
+    }
+
+    function buyPesticides() {
+        if (money < 0.20) return alert('Пестициды стоят $0.20!');
+        money -= 0.20;
+        const now = Date.now();
+        if (pesticideUntil > now) { pesticideUntil += 3600000; } else { pesticideUntil = now + 3600000; }
+        save(); updateUI();
+        alert('🧴 Пестициды распылены! Ферма защищена от жуков на 1 час.');
+    }
+
+    function buyDog() {
+        if (level < 5) return alert('🐕 Собака-охотник доступна только фермерам 5 уровня!');
+        if (money < 15.00) return alert('Собака стоит $15.00!');
+        money -= 15.00;
+        dogCharges += 20;
+        save(); updateUI();
+        alert('🐕 Собака нанята! Она автоматически сожрет следующих 20 жуков.');
+    }
+
+    // ПРОВЕРКА ПРОГРЕССА ДОСТИЖЕНИЙ + НАЧИСЛЕНИЕ НАГРАДЫ
+    function checkAchievements() {
+        const currentStats = {
+            money: maxScore,
+            tractors: tractorsCount,
+            bugs: statKilledBugs,
+            factory: statProcessedCount,
+            ads: qAds,
+            dog: statDogSaves
+        };
+
+        let alertMessages = [];
+
+        for (let key in ACHIEVEMENT_DB) {
+            let currentLvl = achLevels[key]; // текущий уровень (0 - ничего, 1 - бронза, 2 - серебро, 3 - золото)
+            if (currentLvl < 3) {
+                let target = ACHIEVEMENT_DB[key].steps[currentLvl];
+                if (currentStats[key] >= target) {
+                    // Выдали награду!
+                    let rewardMoney = ACHIEVEMENT_DB[key].rewards.money[currentLvl];
+                    let rewardSeeds = ACHIEVEMENT_DB[key].rewards.seeds[currentLvl];
+                    
+                    money += rewardMoney;
+                    seeds += rewardSeeds;
+                    achLevels[key]++; // Повышаем уровень достижения
+                    
+                    alertMessages.push(`🏅 Получено достижение: "${ACHIEVEMENT_DB[key].title}" (${ACHIEVEMENT_DB[key].icon[achLevels[key]]})!\nНаграда: +${rewardMoney}$ и +${rewardSeeds} семян!`);
+                }
+            }
+        }
+
+        if (alertMessages.length > 0) {
+            save();
+            updateUI();
+            alert(alertMessages.join("\n\n"));
+        }
     }
 
     function renderGrid() {
@@ -311,13 +436,14 @@
     function killBug(i) {
         plots[i].status = 'growing';
         plots[i].startTime = Date.now();
-        save(); updateUI();
+        statKilledBugs++; // Добавляем в ачивку ручное убийство
+        checkAchievements(); save(); updateUI();
     }
 
     function harvest(i, isAuto, event) {
         let currentTotal = stock[1] + stock[2] + stock[3];
         if (currentTotal >= getMaxStock()) {
-            if (!isAuto) alert('📦 Склад забит! Продай сырье или переработай его на заводе!');
+            if (!isAuto) alert('📦 Склад забит!');
             return;
         }
 
@@ -326,9 +452,7 @@
         if (!isAuto && Math.random() < 0.10) {
             let bonus = getCropPrice(plots[i].type) * 5;
             money += bonus;
-            if(event) {
-                showCritText(event.clientX, event.clientY, `✨ КРИТ +${bonus.toFixed(4)}$!`);
-            }
+            if(event) { showCritText(event.clientX, event.clientY, `✨ КРИТ +${bonus.toFixed(4)}$!`); }
         }
 
         plots[i] = { status: 'empty', startTime: 0, duration: 0, icon: '', type: 1 };
@@ -371,7 +495,7 @@
             money += totalIncome; maxScore = Math.max(maxScore, money);
             processedStock = 0;
         }
-        save(); updateUI();
+        checkAchievements(); save(); updateUI();
     }
 
     function buySeeds() {
@@ -381,9 +505,8 @@
 
     function buyBotShare(index) {
         let cost = bots[index].money * 0.2; 
-        if (money < cost) return alert('Недостаточно денег для покупки акций этого фермера!');
-        money -= cost;
-        botShares[index]++;
+        if (money < cost) return alert('Недостаточно денег!');
+        money -= cost; botShares[index]++;
         save(); updateUI();
     }
 
@@ -407,7 +530,7 @@
 
     function upgradeCrop(type) {
         let cost = getCropUpgradeCost(type);
-        if (money < cost) return alert('Мало денег для селекции!');
+        if (money < cost) return alert('Мало денег!');
         money -= cost; cropLevels[type]++;
         save(); updateUI();
     }
@@ -415,7 +538,7 @@
     function buyAutoTractor() {
         if (money < tractorCost) return alert('Мало денег!');
         money -= tractorCost; tractorsCount++; tractorCost = parseFloat((tractorCost * 1.8).toFixed(2));
-        qTractors++; checkQuests(); save(); updateUI();
+        qTractors++; checkQuests(); checkAchievements(); save(); updateUI();
     }
 
     function refuelTractor() {
@@ -423,35 +546,24 @@
         money -= 0.50; currentFuel = getMaxFuel(); save(); updateUI();
     }
 
-    // ──🛡️ АНТИЧИТ СИСТЕМА ДЛЯ РЕКЛАМЫ ──────────────────────────────────────────
     function watchAdWithAntiCheat() {
         const now = Date.now();
         const timePassed = now - lastAdTime;
+        if (timePassed < AD_COOLDOWN) return;
 
-        // 1. Проверка на кулдаун (30 сек)
-        if (timePassed < AD_COOLDOWN) {
-            alert(`⏳ Рекламная сеть перегружена! Подождите еще ${Math.ceil((AD_COOLDOWN - timePassed)/1000)} сек.`);
-            return;
-        }
-
-        // 2. Генерация капчи (Анти-кликер)
-        let num1 = Math.floor(Math.random() * 5) + 2; // от 2 до 6
-        let num2 = Math.floor(Math.random() * 4) + 1; // от 1 до 4
+        let num1 = Math.floor(Math.random() * 5) + 2;
+        let num2 = Math.floor(Math.random() * 4) + 1;
         let correctAnswer = num1 + num2;
-
-        let playerAnswer = prompt(`🤖 ПРОВЕРКА НА РОБОТА (Защита от кликеров):\nСколько будет ${num1} + ${num2}?`);
+        let playerAnswer = prompt(`🤖 ПРОВЕРКА НА РОБОТА:\nСколько будет ${num1} + ${num2}?`);
         
-        if (playerAnswer === null) return; // Нажал отмену
-
+        if (playerAnswer === null) return;
         if (parseInt(playerAnswer) === correctAnswer) {
-            // Успех! Начисляем награду
             money += AD_REWARD; maxScore = Math.max(maxScore, money);
-            qAds++; 
-            lastAdTime = Date.now(); // Сбрасываем таймер
-            checkQuests(); save(); updateUI();
-            alert(`📺 Реклама просмотрена! Получено +${AD_REWARD}$`);
+            qAds++; lastAdTime = Date.now();
+            checkQuests(); checkAchievements(); save(); updateUI();
+            alert(`📺 Получено +${AD_REWARD}$`);
         } else {
-            alert("❌ Неверный ответ! Автокликеры заблокированы. Попробуйте еще раз.");
+            alert("❌ Неверный ответ!");
         }
     }
 
@@ -462,6 +574,7 @@
     }
 
     function updateUI() {
+        const now = Date.now();
         document.getElementById('money').innerText = fmt(money);
         document.getElementById('level').innerText = level;
         document.getElementById('seeds').innerText = seeds;
@@ -496,6 +609,26 @@
         tr.innerText = lastTrend === 'up' ? '📈 ТРЕНД: РОСТ' : '📉 ТРЕНД: КРИЗИС';
         tr.className = 'trend ' + (lastTrend === 'up' ? 'trend-up' : 'trend-down');
 
+        const pestTimerEl = document.getElementById('pesticide-timer');
+        if (pesticideUntil > now) {
+            let secLeft = Math.ceil((pesticideUntil - now) / 1000);
+            pestTimerEl.innerText = `🧴 Пестициды: ${Math.floor(secLeft/60)}:${String(secLeft%60).padStart(2,'0')}`;
+            pestTimerEl.style.color = '#2ecc71';
+        } else {
+            pestTimerEl.innerText = `🧴 Защита: Выкл`; pestTimerEl.style.color = '#e74c3c';
+        }
+
+        const dogStatusEl = document.getElementById('dog-status');
+        if (dogCharges > 0) {
+            dogStatusEl.innerText = `🐕 Пёс активен (Зарядов: ${dogCharges})`; dogStatusEl.style.color = '#f1c40f';
+        } else {
+            dogStatusEl.innerText = `🐕 Пёс: Не нанят`; dogStatusEl.style.color = '#fff';
+        }
+
+        const dogBuyBtn = document.getElementById('dog-buy-btn');
+        if (level < 5) { dogBuyBtn.disabled = true; dogBuyBtn.innerText = "🔒 Ур. 5"; } 
+        else { dogBuyBtn.disabled = false; dogBuyBtn.innerText = "Купить ($15.0)"; }
+
         document.getElementById('cost-u-stock').innerText = getUpgradeCost('stock', upStockLvl).toFixed(1);
         document.getElementById('cost-u-fact').innerText = getUpgradeCost('factory', upFactLvl).toFixed(1);
         document.getElementById('cost-u-fuel').innerText = getUpgradeCost('fuel', upFuelLvl).toFixed(1);
@@ -507,28 +640,18 @@
         document.getElementById('cost-c-t').innerText = getCropUpgradeCost(2).toFixed(1);
         document.getElementById('cost-c-w').innerText = getCropUpgradeCost(3).toFixed(1);
 
-        const now = Date.now();
         const timePassed = now - lastAdTime;
         const btnAd = document.getElementById('ad-button');
-        
-        // Визуальное обновление состояния кнопки рекламы (пишем сколько секунд до разблокировки)
         if (timePassed < AD_COOLDOWN) {
-            let secLeft = Math.ceil((AD_COOLDOWN - timePassed) / 1000);
-            btnAd.innerText = `⏳ ПОДОЖДИТЕ ${secLeft} сек.`;
+            btnAd.innerText = `⏳ ПОДОЖДИТЕ ${Math.ceil((AD_COOLDOWN - timePassed) / 1000)} сек.`;
             btnAd.disabled = true;
         } else {
-            btnAd.innerText = `📺 СМОТРЕТЬ РЕКЛАМУ (+2.0$)`;
-            btnAd.disabled = false;
+            btnAd.innerText = `📺 СМОТРЕТЬ РЕКЛАМУ (+2.0$)`; btnAd.disabled = false;
         }
 
         const nowDate = new Date();
         document.getElementById('clock').innerText = String(nowDate.getHours()).padStart(2,'0') + ':' + String(nowDate.getMinutes()).padStart(2,'0') + ':' + String(nowDate.getSeconds()).padStart(2,'0');
-        document.getElementById('weather-display').innerText = `🌦️ ПОГОДА: ${currentWeather.name} (${currentWeather.desc})`;
-
-        if (maxScore >= 0.10) document.getElementById('badge-first-money').classList.add('unlocked');
-        if (tractorsCount >= 5) document.getElementById('badge-tractor-5').classList.add('unlocked');
-        if (maxScore >= 100) document.getElementById('badge-rich').classList.add('unlocked');
-        if (stock[3] > 0) document.getElementById('badge-watermelon').classList.add('unlocked');
+        document.getElementById('weather-display').innerText = `🌦️ ПОГОДА: ${currentWeather.name}`;
 
         document.getElementById('quests-container').innerHTML = [
             { t: `🌾 Собрать урожай: ${Math.min(10, qHarvested)}/10`, d: qRewardClaimed[0] },
@@ -536,19 +659,39 @@
             { t: `🚜 Купить трактор: ${Math.min(1, qTractors)}/1`, d: qRewardClaimed[2] }
         ].map(q => `<div class="quest-item ${q.d ? 'quest-done' : ''}">${q.d ? '✅' : '⏳'} ${q.t}</div>`).join('');
 
+        // РЕНДЕРИНГ МНОГОУРОВНЕВЫХ ДОСТИЖЕНИЙ
+        const currentStats = { money: maxScore, tractors: tractorsCount, bugs: statKilledBugs, factory: statProcessedCount, ads: qAds, dog: statDogSaves };
+        document.getElementById('achievements-box').innerHTML = Object.keys(ACHIEVEMENT_DB).map(key => {
+            let db = ACHIEVEMENT_DB[key];
+            let lvl = achLevels[key];
+            let currentVal = currentStats[key];
+            let isMax = lvl >= 3;
+            let target = isMax ? db.steps[2] : db.steps[lvl];
+            let pct = isMax ? 100 : Math.min(100, (currentVal / target) * 100);
+            let displayVal = key === 'money' ? currentVal.toFixed(2) : Math.floor(currentVal);
+            let displayTarget = key === 'money' ? target.toFixed(1) : target;
+            let iconBadge = db.icon[lvl];
+
+            return `
+                <div class="achieve-row">
+                    <div class="achieve-header">
+                        <span>${db.title} <b class="achieve-badge">${iconBadge}</b></span>
+                        <span style="color:#f1c40f;">${isMax ? 'МАКС' : 'Ур.' + (lvl+1)}</span>
+                    </div>
+                    <div class="progress-bar" style="height:9px; margin:2px 0;">
+                        <div class="progress-fill" style="width: ${pct}%; background:#3498db;"></div>
+                        <div class="progress-text" style="font-size:8px; line-height:9px;">${displayVal}/${displayTarget}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
         const all = bots.concat([{ name: 'ВЫ', money: maxScore, isPlayer: true }]).sort((a,b) => b.money - a.money);
         document.getElementById('leaderboard').innerHTML = all.map((p) => {
-            if (p.isPlayer) {
-                return `<div class="leader-item player-row"><span>⭐ ВЫ</span><span>${p.money.toFixed(2)}$</span></div>`;
-            } else {
-                let botIdx = bots.findIndex(b => b.name === p.name);
-                let shareCount = botShares[botIdx] || 0;
-                let cost = p.money * 0.2;
-                return `<div class="leader-item">
-                    <span>${p.name} <small style="color:#2ecc71;">(x${shareCount})</small></span>
-                    <span>${p.money.toFixed(2)}$ <button class="invest-btn" onclick="buyBotShare(${botIdx})" title="Купить долю за ${cost.toFixed(2)}$">💸</button></span>
-                </div>`;
-            }
+            if (p.isPlayer) return `<div class="leader-item player-row"><span>⭐ ВЫ</span><span>${p.money.toFixed(2)}$</span></div>`;
+            let botIdx = bots.findIndex(b => b.name === p.name);
+            let shareCount = botShares[botIdx] || 0;
+            return `<div class="leader-item"><span>${p.name} <small style="color:#2ecc71;">(x${shareCount})</small></span><span>${p.money.toFixed(2)}$ <button class="invest-btn" onclick="buyBotShare(${botIdx})">💸</button></span></div>`;
         }).join('');
 
         renderGrid();
@@ -563,6 +706,13 @@
         localStorage.setItem('mx_up_fact', upFactLvl); localStorage.setItem('mx_up_fuel', upFuelLvl); localStorage.setItem('mx_fuel', currentFuel);
         localStorage.setItem('mx_qh', qHarvested); localStorage.setItem('mx_qa', qAds); localStorage.setItem('mx_qt', qTractors); localStorage.setItem('mx_qclaim', JSON.stringify(qRewardClaimed));
         localStorage.setItem('mx_bot_shares', JSON.stringify(botShares)); localStorage.setItem('mx_last_ad_time', lastAdTime);
+        localStorage.setItem('mx_pest_until', pesticideUntil); localStorage.setItem('mx_dog_charges', dogCharges);
+        
+        // Сохранение новой статы достижений
+        localStorage.setItem('mx_st_bugs', statKilledBugs);
+        localStorage.setItem('mx_st_proc', statProcessedCount);
+        localStorage.setItem('mx_st_dogsaves', statDogSaves);
+        localStorage.setItem('mx_ach_lvls', JSON.stringify(achLevels));
     }
 
     window.addEventListener('DOMContentLoaded', function() {
@@ -576,36 +726,45 @@
                 if (factoryProgress >= 100) {
                     isFactoryRunning = false;
                     factoryProgress = 0;
-                    processedStock += getFactorySpeed(); 
+                    let speed = getFactorySpeed();
+                    processedStock += speed; 
+                    statProcessedCount += speed; // Засчитываем в статистику достижений
+                    checkAchievements();
                 }
             }
 
             if (tractorsCount > 0 && currentFuel > 0) {
-                currentFuel -= (0.1 * tractorsCount); 
-                if (currentFuel < 0) currentFuel = 0;
+                currentFuel -= (0.1 * tractorsCount); if (currentFuel < 0) currentFuel = 0;
             }
 
             plots.forEach(function(p, i) {
-                if (p.status === 'growing' && now - p.startTime >= p.duration) {
-                    plots[i].status = 'ready';
-                }
+                if (p.status === 'growing' && now - p.startTime >= p.duration) plots[i].status = 'ready';
                 if (tractorsCount > 0 && currentFuel > 0 && unlockedPlots[i]) {
                     if (plots[i].status === 'ready') harvest(i, true);
                     if (plots[i].status === 'empty') {
-                        if (i >= FREE_PLOTS && seeds <= 0 && money >= 0.10) {
-                            money -= 0.10; seeds += 10;
-                        }
+                        if (i >= FREE_PLOTS && seeds <= 0 && money >= 0.10) { money -= 0.10; seeds += 10; }
                         if (i < FREE_PLOTS || seeds > 0) plantSeed(i);
                     }
                 }
             });
 
+            // Шанс спавна жуков (2%)
             if (Math.random() < 0.02) {
-                let growingPlots = [];
-                plots.forEach((p, index) => { if (p.status === 'growing') growingPlots.push(index); });
-                if (growingPlots.length > 0) {
-                    let randIndex = growingPlots[Math.floor(Math.random() * growingPlots.length)];
-                    plots[randIndex].status = 'bugged';
+                if (pesticideUntil <= now) { 
+                    let growingPlots = [];
+                    plots.forEach((p, index) => { if (p.status === 'growing') growingPlots.push(index); });
+                    
+                    if (growingPlots.length > 0) {
+                        let randIndex = growingPlots[Math.floor(Math.random() * growingPlots.length)];
+                        
+                        if (dogCharges > 0) {
+                            dogCharges--;
+                            statDogSaves++; // Собака спасла ферму — пишем в ачивку!
+                            checkAchievements();
+                        } else {
+                            plots[randIndex].status = 'bugged';
+                        }
+                    }
                 }
             }
 
@@ -618,18 +777,12 @@
                 marketPrices.processed = 0.050 * mod * (Math.random() * 0.3 + 0.9);
             }
 
-            if (Math.floor(now / 1000) % 30 === 0) {
-                currentWeather = WEATHER_TYPES[Math.floor(Math.random() * WEATHER_TYPES.length)];
-            }
+            if (Math.floor(now / 1000) % 30 === 0) currentWeather = WEATHER_TYPES[Math.floor(Math.random() * WEATHER_TYPES.length)];
 
             bots.forEach((b, idx) => { 
-                let botIncome = b.baseIncome * (Math.random() * 0.5 + 0.8);
-                b.money += botIncome; 
-                
+                let botIncome = b.baseIncome * (Math.random() * 0.5 + 0.8); b.money += botIncome; 
                 let playerShares = botShares[idx] || 0;
-                if (playerShares > 0) {
-                    money += botIncome * 0.05 * playerShares;
-                }
+                if (playerShares > 0) money += botIncome * 0.05 * playerShares;
             });
 
             level = money >= 100 ? 5 : money >= 15 ? 3 : 1;
