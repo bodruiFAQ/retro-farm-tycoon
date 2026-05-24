@@ -15,20 +15,20 @@
         .plot { width: 105px; height: 105px; background: radial-gradient(#a0522d, #5c2c16); border: 4px solid #3d1c0e; border-radius: 18px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.1s ease; box-shadow: 0 4px 0 #261108; box-sizing: border-box; }
         .plot:active { transform: translateY(4px); box-shadow: 0 0px 0 transparent; }
         .growing { background: radial-gradient(#d35400, #a04000) !important; border-color: #783000 !important; }
-        .ready { background: radial-gradient(#2ecc71, #27ae60) !important; border-color: #1e7e34 !important; }
-        .locked { background: radial-gradient(#4a4a4a, #2a2a2a) !important; border-color: #555 !important; cursor: pointer !important; }
+        .ready   { background: radial-gradient(#2ecc71, #27ae60) !important; border-color: #1e7e34 !important; }
+        .locked  { background: radial-gradient(#4a4a4a, #2a2a2a) !important; border-color: #555 !important; cursor: pointer !important; }
         .plot-label { background: rgba(0,0,0,0.6); padding: 1px 5px; border-radius: 8px; font-size: 9px; color: white; font-weight: bold; margin-top: 2px; }
         .free-badge { background: rgba(46,204,113,0.7); padding: 1px 5px; border-radius: 8px; font-size: 8px; color: white; font-weight: bold; margin-top: 2px; }
         .btn-box { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 15px; }
         button { border: none; color: white; padding: 10px 15px; font-size: 12px; font-weight: bold; border-radius: 10px; cursor: pointer; width: 100%; }
         .upgrade-btn { background: linear-gradient(#2ecc71, #27ae60); box-shadow: 0 3px 0 #1e7e34; }
-        .market-btn { background: linear-gradient(#e67e22, #d35400); box-shadow: 0 3px 0 #a04000; }
-        .ad-btn { background: linear-gradient(#e74c3c, #c0392b); box-shadow: 0 3px 0 #962d22; }
+        .market-btn  { background: linear-gradient(#e67e22, #d35400); box-shadow: 0 3px 0 #a04000; }
+        .ad-btn      { background: linear-gradient(#e74c3c, #c0392b); box-shadow: 0 3px 0 #962d22; }
         .panel-title { font-weight: bold; color: #f1c40f; border-bottom: 1px solid #f1c40f; padding-bottom: 5px; margin-bottom: 8px; font-size: 14px; text-align: center; }
         .leader-item { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px dashed rgba(255,255,255,0.1); }
-        .player-row { color: #5dade2; font-weight: bold; background: rgba(93,173,226,0.2); border-radius: 4px; padding: 3px 5px; }
+        .player-row  { color: #5dade2; font-weight: bold; background: rgba(93,173,226,0.2); border-radius: 4px; padding: 3px 5px; }
         .seed-price-box { margin-bottom: 8px; padding: 6px; background: rgba(231,76,60,0.15); border-radius: 8px; font-size: 12px; text-align: center; }
-        @keyframes blink { 50% { opacity: 0.5; } }
+        @keyframes blink    { 50% { opacity: 0.5; } }
         @keyframes fillRing { from { stroke-dashoffset: 188.5; } to { stroke-dashoffset: 0; } }
         .ring-wrap { position: relative; width: 68px; height: 68px; display: flex; align-items: center; justify-content: center; }
         .ring-wrap .ring-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 22px; pointer-events: none; line-height: 1; }
@@ -86,15 +86,16 @@
 </div>
 
 <script>
+window.addEventListener('DOMContentLoaded', function() {
+
     // ── Constants ──────────────────────────────────────────────────────────────
-    const FREE_PLOTS        = 3;       // first N plots never cost seeds or money
-    const PLOT_UNLOCK_COSTS = [0, 0, 0, 100, 200, 700, 1200, 1700, 2200]; // index = plot
-    const HARVEST_REWARD    = 0.002;   // $ per harvest (0.2 cents)
-    const TRACTOR_INCOME_PM = 0.0001;  // $ per tractor per minute (0.01 cents/min)
+    const FREE_PLOTS        = 3;
+    const PLOT_UNLOCK_COSTS = [0, 0, 0, 100, 200, 700, 1200, 1700, 2200];
+    const HARVEST_REWARD    = 0.002;
+    const TRACTOR_INCOME_PM = 0.0001;
     const TRACTOR_BASE_COST = 50;
-    const AD_REWARD         = 10;      // $ flat per ad view
-    const SEED_BUY_PRICE    = 0.10;    // $ per 10 seeds
-    // market sell prices ($ per 10 seeds harvested-equivalent) — tiny
+    const AD_REWARD         = 10;
+    const SEED_BUY_PRICE    = 0.10;
     const MARKET_PRICES     = [0.0003, 0.0004, 0.0005, 0.0006, 0.0008, 0.0010];
 
     // ── State ──────────────────────────────────────────────────────────────────
@@ -104,14 +105,13 @@
     let tractorsCount = parseInt(localStorage.getItem('v5_tractors'))       || 0;
     let tractorCost   = parseInt(localStorage.getItem('v5_tractor_cost'))   || TRACTOR_BASE_COST;
     let maxScore      = parseFloat(localStorage.getItem('v5_max_score'))    || 0;
-    // unlocked[i] = true means plot i is available to use
     let unlockedPlots = JSON.parse(localStorage.getItem('v5_unlocked') || 'null')
                         || [true,true,true,false,false,false,false,false,false];
     let lastWeeklyReset = parseInt(localStorage.getItem('v5_weekly_reset')) || 0;
 
-    let sCarrot    = parseInt(localStorage.getItem('s_carrot'))    || 0;
-    let sTomato    = parseInt(localStorage.getItem('s_tomato'))    || 0;
-    let sWatermelon= parseInt(localStorage.getItem('s_watermelon'))|| 0;
+    let sCarrot     = parseInt(localStorage.getItem('s_carrot'))     || 0;
+    let sTomato     = parseInt(localStorage.getItem('s_tomato'))     || 0;
+    let sWatermelon = parseInt(localStorage.getItem('s_watermelon')) || 0;
 
     maxScore = Math.max(maxScore, money);
 
@@ -124,14 +124,18 @@
         { name: "ElonMusk_Farm",  money: 0.50  }
     ];
 
-    const plots = Array(9).fill(null).map(() => ({ status: 'empty', startTime: 0, duration: 0, icon: '', reward: 0 }));
+    const plots = Array(9).fill(null).map(() => ({
+        status: 'empty', startTime: 0, duration: 0, icon: '', reward: 0
+    }));
+
     const gridElement = document.getElementById('farm-grid');
 
     // ── Helpers ────────────────────────────────────────────────────────────────
     function fmt(v) {
-        if (v >= 1000) return v.toFixed(2);
-        if (v >= 1)    return v.toFixed(4);
-        return v.toFixed(4);
+        const n = parseFloat(v) || 0;
+        if (n >= 1000) return n.toFixed(2);
+        if (n >= 1)    return n.toFixed(4);
+        return n.toFixed(4);
     }
 
     function formatTimeLeft(ms) {
@@ -175,25 +179,25 @@
 
     // ── Render grid ────────────────────────────────────────────────────────────
     function renderGrid() {
+        if (!gridElement) return;
         const now = Date.now();
         gridElement.innerHTML = '';
-        plots.forEach((plot, i) => {
+        plots.forEach(function(plot, i) {
             const div = document.createElement('div');
             div.className = 'plot';
 
             if (!unlockedPlots[i]) {
-                // LOCKED — show unlock cost
                 div.className += ' locked';
                 const cost = PLOT_UNLOCK_COSTS[i];
                 div.innerHTML = `<div style="font-size:20px;">🔒</div>
                     <div class="plot-label" style="font-size:8px; text-align:center;">КУПИТЬ<br>${cost}$</div>`;
-                div.onclick = () => unlockPlot(i);
+                div.onclick = function() { unlockPlot(i); };
 
             } else if (plot.status === 'empty') {
                 const isFree = i < FREE_PLOTS;
                 div.innerHTML = SOIL_SVG
                     + `<div class="${isFree ? 'free-badge' : 'plot-label'}">${isFree ? '✅ БЕСПЛАТНО' : 'ПОСАДИТЬ'}</div>`;
-                div.onclick = () => plantSeed(i);
+                div.onclick = function() { plantSeed(i); };
 
             } else if (plot.status === 'growing') {
                 const elapsed  = now - plot.startTime;
@@ -206,7 +210,7 @@
                 div.className += ' ready';
                 div.innerHTML = `<div style="font-size:34px;">${plot.icon}</div>
                     <div class="plot-label">СОБРАТЬ +${fmt(plot.reward)}$</div>`;
-                div.onclick = () => harvest(i);
+                div.onclick = function() { harvest(i); };
             }
 
             gridElement.appendChild(div);
@@ -216,7 +220,7 @@
     // ── Actions ────────────────────────────────────────────────────────────────
     function unlockPlot(i) {
         const cost = PLOT_UNLOCK_COSTS[i];
-        if (money < cost) { alert(`Недостаточно денег! Нужно ${cost}$`); return; }
+        if (money < cost) { alert('Недостаточно денег! Нужно ' + cost + '$'); return; }
         money -= cost;
         unlockedPlots[i] = true;
         save(); updateUI();
@@ -237,7 +241,7 @@
     function harvest(i) {
         money += plots[i].reward;
         maxScore = Math.max(maxScore, money);
-        level = Math.max(1, money >= 60 ? 5 : money >= 20 ? 3 : 1);
+        level = money >= 60 ? 5 : money >= 20 ? 3 : 1;
         plots[i] = { status: 'empty', startTime: 0, duration: 0, icon: '', reward: 0 };
         save(); updateUI();
     }
@@ -253,7 +257,7 @@
     function watchAdReward() {
         money += AD_REWARD;
         maxScore = Math.max(maxScore, money);
-        level = Math.max(1, money >= 60 ? 5 : money >= 20 ? 3 : 1);
+        level = money >= 60 ? 5 : money >= 20 ? 3 : 1;
         save(); updateUI();
     }
 
@@ -270,7 +274,7 @@
         save(); updateUI();
     }
 
-    // ── UI update ──────────────────────────────────────────────────────────────
+    // ── UI ─────────────────────────────────────────────────────────────────────
     function updateUI() {
         document.getElementById('money').innerText  = fmt(money);
         document.getElementById('level').innerText  = level;
@@ -279,18 +283,17 @@
 
         const incomePerMin = tractorsCount * TRACTOR_INCOME_PM;
         document.getElementById('tractor-status').innerText =
-            `Активных тракторов: ${tractorsCount} (+${fmt(incomePerMin)} $/мин)`;
+            'Активных тракторов: ' + tractorsCount + ' (+' + fmt(incomePerMin) + ' $/мин)';
 
-        document.getElementById('stat-carrot').innerText    = sCarrot;
-        document.getElementById('stat-tomato').innerText    = sTomato;
-        document.getElementById('stat-watermelon').innerText= sWatermelon;
+        document.getElementById('stat-carrot').innerText     = sCarrot;
+        document.getElementById('stat-tomato').innerText     = sTomato;
+        document.getElementById('stat-watermelon').innerText = sWatermelon;
 
         const crop = getCropData();
         document.getElementById('market-crop-name').innerText = crop.name + ' ' + crop.icon;
-        document.getElementById('market-price').innerText = fmt(currentMarketPrice) + '$';
-        document.getElementById('seed-buy-price').innerText  = fmt(SEED_BUY_PRICE) + '$';
+        document.getElementById('market-price').innerText     = fmt(currentMarketPrice) + '$';
+        document.getElementById('seed-buy-price').innerText   = fmt(SEED_BUY_PRICE) + '$';
 
-        // clock
         const now = new Date();
         document.getElementById('clock').innerText =
             String(now.getHours()).padStart(2,'0') + ':' +
@@ -301,101 +304,95 @@
         checkWeeklyReset();
 
         const h = now.getHours();
-        const el = document.getElementById('night-warning');
-        if (h >= 22 || h < 6) {
-            el.innerText = '🌙 НОЧНОЙ БОНУС! Цены продажи выше на 20%';
-        } else {
-            el.innerText = '';
-        }
+        document.getElementById('night-warning').innerText =
+            (h >= 22 || h < 6) ? '🌙 НОЧНОЙ БОНУС! Цены продажи выше на 20%' : '';
+
+        renderGrid();
     }
 
     function renderLeaderboard() {
-        const all = [...bots, { name: 'ВЫ', money: maxScore }]
-            .sort((a, b) => b.money - a.money);
+        const all = bots.concat([{ name: 'ВЫ', money: maxScore }])
+            .sort(function(a, b) { return b.money - a.money; });
         const medals = ['🥇','🥈','🥉'];
-        document.getElementById('leaderboard').innerHTML = all.map((p, i) => {
+        document.getElementById('leaderboard').innerHTML = all.map(function(p, i) {
             const isPlayer = p.name === 'ВЫ';
             const medal = medals[i] || (i + 1) + '.';
-            return `<div class="leader-item ${isPlayer ? 'player-row' : ''}">
-                <span>${medal} ${p.name}</span>
-                <span>${fmt(p.money)}$</span>
-            </div>`;
+            return '<div class="leader-item ' + (isPlayer ? 'player-row' : '') + '">'
+                + '<span>' + medal + ' ' + p.name + '</span>'
+                + '<span>' + fmt(p.money) + '$</span></div>';
         }).join('');
     }
 
     function checkWeeklyReset() {
         const now = Date.now();
-        const day = new Date().getDay(); // 0=Sunday
+        const day = new Date().getDay();
         if (day === 0 && now - lastWeeklyReset > 6 * 24 * 3600 * 1000) {
             maxScore = money;
             lastWeeklyReset = now;
-            bots.forEach(b => b.money = parseFloat((Math.random() * 5).toFixed(2)));
+            bots.forEach(function(b) { b.money = parseFloat((Math.random() * 5).toFixed(2)); });
             localStorage.setItem('v5_weekly_reset', lastWeeklyReset);
         }
     }
 
     function save() {
-        localStorage.setItem('v5_money',       money);
-        localStorage.setItem('v5_level',       level);
-        localStorage.setItem('v5_seeds',       seeds);
-        localStorage.setItem('v5_tractors',    tractorsCount);
-        localStorage.setItem('v5_tractor_cost',tractorCost);
-        localStorage.setItem('v5_max_score',   maxScore);
-        localStorage.setItem('v5_unlocked',    JSON.stringify(unlockedPlots));
-        localStorage.setItem('s_carrot',       sCarrot);
-        localStorage.setItem('s_tomato',       sTomato);
-        localStorage.setItem('s_watermelon',   sWatermelon);
+        localStorage.setItem('v5_money',        money);
+        localStorage.setItem('v5_level',        level);
+        localStorage.setItem('v5_seeds',        seeds);
+        localStorage.setItem('v5_tractors',     tractorsCount);
+        localStorage.setItem('v5_tractor_cost', tractorCost);
+        localStorage.setItem('v5_max_score',    maxScore);
+        localStorage.setItem('v5_unlocked',     JSON.stringify(unlockedPlots));
+        localStorage.setItem('s_carrot',        sCarrot);
+        localStorage.setItem('s_tomato',        sTomato);
+        localStorage.setItem('s_watermelon',    sWatermelon);
     }
 
-    // ── Main game loop (1 sec) ─────────────────────────────────────────────────
-    setInterval(() => {
+    // ── Game loop ──────────────────────────────────────────────────────────────
+    setInterval(function() {
         const now = Date.now();
 
-        // tractor passive income: TRACTOR_INCOME_PM per tractor per minute → per second
         if (tractorsCount > 0) {
             money += tractorsCount * TRACTOR_INCOME_PM / 60;
             maxScore = Math.max(maxScore, money);
         }
 
-        // check growing → ready
-        plots.forEach((p, i) => {
+        plots.forEach(function(p, i) {
             if (p.status === 'growing' && now - p.startTime >= p.duration) {
                 plots[i].status = 'ready';
             }
         });
 
-        // auto-harvest + auto-plant with tractors
         if (tractorsCount > 0) {
-            plots.forEach((p, i) => {
+            plots.forEach(function(p, i) {
                 if (p.status === 'ready' && unlockedPlots[i]) harvest(i);
             });
-            plots.forEach((p, i) => {
+            plots.forEach(function(p, i) {
                 if (p.status === 'empty' && unlockedPlots[i]) {
-                    const isFree = i < FREE_PLOTS;
-                    if (isFree || seeds > 0) plantSeed(i);
+                    if (i < FREE_PLOTS || seeds > 0) plantSeed(i);
                 }
             });
         }
 
-        // market price fluctuation every 10s
         if (Math.floor(now / 1000) % 10 === 0) {
             const h = new Date().getHours();
             const base = MARKET_PRICES[Math.floor(Math.random() * MARKET_PRICES.length)];
             currentMarketPrice = (h >= 22 || h < 6) ? parseFloat((base * 1.2).toFixed(5)) : base;
         }
 
-        // bot growth (tiny, matching new economy)
-        bots.forEach(b => b.money += parseFloat((Math.random() * 0.001).toFixed(5)));
+        bots.forEach(function(b) { b.money += parseFloat((Math.random() * 0.001).toFixed(5)); });
 
-        level = Math.max(1, money >= 60 ? 5 : money >= 20 ? 3 : 1);
+        level = money >= 60 ? 5 : money >= 20 ? 3 : 1;
         save();
         updateUI();
     }, 1000);
 
-    // re-render every 100ms for smooth ring countdown
-    setInterval(() => renderGrid(), 100);
+    // smooth ring re-render
+    setInterval(function() { renderGrid(); }, 100);
 
+    // first render
     updateUI();
+
+}); // end DOMContentLoaded
 </script>
 </body>
 </html>
