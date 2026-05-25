@@ -362,4 +362,97 @@
     function getCropUpgradeCost(type) {
         if (type === 1) return 0.5 * Math.pow(1.9, cropLevels[1] - 1);
         if (type === 2) return 2.0 * Math.pow(2.1, cropLevels[2] - 1);
-        if (type === 3) return
+        if (type === 3) return 5.0 * Math.pow(2.5, cropLevels[3] - 1);
+        return 1;
+    }
+
+    function fmt(v) { return (parseFloat(v) || 0).toFixed(4); }
+    function formatTimeLeft(ms) {
+        const s = Math.ceil(ms / 1000);
+        return s <= 0 ? '0s' : s < 60 ? s + 's' : Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+    }
+
+    function getCropData() {
+        if (level >= 5) return { type: 3, icon: '🍉', time: BASE_TIMES[3] * currentWeather.speed };
+        if (level >= 3) return { type: 2, icon: '🍅', time: BASE_TIMES[2] * currentWeather.speed };
+        return                 { type: 1, icon: '🥕', time: BASE_TIMES[1] * currentWeather.speed };
+    }
+
+    function checkDailyReset() {
+        let todayStr = new Date().toDateString();
+        if (pesticideLastDate !== todayStr) {
+            pesticideDailyUses = 0;
+            pesticideLastDate = todayStr;
+            save();
+        }
+    }
+
+    function generateRandomQuest(slotIndex) {
+        const questTypes = [
+            { id: 'harvest', text: 'Собрать урожай', baseTarget: 15, multi: 10, rewMoney: 0.15, rewSeeds: 8 },
+            { id: 'bugs', text: 'Раздавить жуков 🐛', baseTarget: 2, multi: 2, rewMoney: 0.25, rewSeeds: 10 },
+            { id: 'ads', text: 'Посмотреть рекламу 📺', baseTarget: 1, multi: 1, rewMoney: 0.50, rewSeeds: 15 },
+            { id: 'upgrades', text: 'Купить апгрейд⚙️', baseTarget: 1, multi: 1, rewMoney: 0.40, rewSeeds: 5 },
+            { id: 'factory', text: 'Переработать', baseTarget: 10, multi: 10, rewMoney: 0.35, rewSeeds: 12 },
+            { id: 'sell_money', text: 'Продать товаров', baseTarget: 0.5, multi: 1.5, rewMoney: 0.30, rewSeeds: 10 }
+        ];
+
+        let type = questTypes[Math.floor(Math.random() * questTypes.length)];
+        let difficultyFactor = Math.max(1, Math.floor(level * 0.8));
+
+        let finalTarget = type.id === 'sell_money' 
+            ? parseFloat((type.baseTarget * difficultyFactor * (Math.random() * 0.5 + 0.8)).toFixed(2))
+            : Math.ceil(type.baseTarget * difficultyFactor);
+
+        activeQuests[slotIndex] = {
+            type: type.id,
+            text: type.text,
+            current: 0,
+            target: finalTarget,
+            rewMoney: parseFloat((type.rewMoney * difficultyFactor).toFixed(2)),
+            rewSeeds: Math.ceil(type.rewSeeds * difficultyFactor),
+            claimed: false
+        };
+    }
+
+    function initQuestsSystem() {
+        if (activeQuests.length === 0) {
+            for (let i = 0; i < 3; i++) { generateRandomQuest(i); }
+            save();
+        }
+    }
+
+    function progressQuest(type, amount) {
+        activeQuests.forEach((q) => {
+            if (!q.claimed && q.type === type) {
+                q.current += amount;
+                if (q.current > q.target) q.current = q.target;
+            }
+        });
+        save();
+    }
+
+    function claimQuestReward(index) {
+        let q = activeQuests[index];
+        if (q.current >= q.target && !q.claimed) {
+            money += q.rewMoney;
+            seeds += q.rewSeeds;
+            q.claimed = true;
+            alert(`✅ Контракт выполнен!\nНаграда: +${q.rewMoney}$ и +${q.rewSeeds} семян!`);
+            generateRandomQuest(index);
+            save(); updateUI();
+        }
+    }
+
+    function buyPesticides() {
+        checkDailyReset();
+        const now = Date.now();
+
+        if (pesticideUntil > now) return alert('🧴 Пестициды уже активны!');
+        if (pesticideCooldownUntil > now) {
+            let timeLeft = Math.ceil((pesticideCooldownUntil - now) / 1000);
+            return alert(`⏳ Земля должна отдохнуть. Подождите еще ${Math.floor(timeLeft/60)} мин.`);
+        }
+
+        let isAdRequired = pesticideDailyUses >= 5;
+        let currentCost = isAd
