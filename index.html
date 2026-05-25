@@ -80,14 +80,14 @@
         .auto-btn    { background: linear-gradient(135deg, #14b8a6, #0d9488); border-bottom: 4px solid #0f766e; }
         .factory-btn { background: linear-gradient(135deg, #a855f7, #8b5cf6); border-bottom: 4px solid #6d28d9; }
         
-        /* Анимация тревожной пульсации бензобака */
         .fuel-alert-btn { animation: fuelAlert 0.8s infinite alternate !important; border-bottom-color: #b45309 !important; }
         @keyframes fuelAlert { from { background: linear-gradient(135deg, #ea580c, #c2410c); transform: scale(1); } to { background: linear-gradient(135deg, #ef4444, #dc2626); transform: scale(1.03); box-shadow: 0 0 15px #ef4444; } }
 
         .panel-title { display: flex; justify-content: center; align-items: center; font-weight: bold; color: #f59e0b; border-bottom: 2px solid #f59e0b; padding-bottom: 4px; margin-bottom: 8px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
         .leader-item { display: flex; justify-content: space-between; padding: 6px 8px; border-bottom: 1px dashed rgba(255,255,255,0.1); align-items: center; font-size: 12px; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
-        .leader-item:hover:not(.player-row) { background: rgba(255,255,255,0.05); }
+        .leader-item:hover:not(.player-row):not(.footer-row) { background: rgba(255,255,255,0.05); }
         .player-row  { color: #f59e0b; font-weight: bold; background: rgba(245,158,11,0.15) !important; border: 1px solid rgba(245,158,11,0.3); cursor: default; }
+        .footer-row { text-align: center; color: #94a3b8; font-style: italic; background: rgba(0,0,0,0.2); font-size: 11px; cursor: default; justify-content: center; padding: 8px; border-bottom: none; }
         
         .countdown { font-size: 10px; font-weight: bold; color: #f8fafc; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 6px; margin-top: 3px; z-index: 2; }
         .weather-box { font-size: 13px; font-weight: bold; background: rgba(59, 130, 246, 0.2); padding: 8px; border-radius: 10px; border: 1px solid #3b82f6; margin-bottom: 8px; text-align: center; width: 100%; box-sizing: border-box; box-shadow: 0 4px 10px rgba(59,130,246,0.2); }
@@ -118,7 +118,6 @@
         .info-modal { border-color: #3b82f6; box-shadow: 0 0 25px rgba(59,130,246,0.6); }
         .info-modal h3 { color: #3b82f6; margin-top: 0; font-size: 16px; text-transform: uppercase; }
 
-        /* Стили для SVG графики культур внутри грядок */
         .plot-svg { width: 50%; height: 50%; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 1; }
         .plot:hover .plot-svg { transform: scale(1.15) rotate(5deg); }
         .growing .plot-svg { animation: plantGrow 1s ease-out; }
@@ -180,13 +179,22 @@
         <div class="grid" id="farm-grid"></div>
         
         <div class="btn-box">
-            <button class="upgrade-btn" onclick="buyAutoTractor()">🛒 КУПИТЬ ТРАКТОР (<span id="tractor-cost">5.00</span> $)</button>
-            <div style="width:100%; display:flex; justify-content:space-between; font-size:11px; background:rgba(0,0,0,0.4); padding:8px; border-radius:8px; box-sizing:border-box; border: 1px solid #334155;">
-                <span>⛽ БАК ТРАКТОРА:</span>
-                <span id="fuel-display">100/100 л.</span>
+            <button class="upgrade-btn" onclick="buyAutoTractor()">
+                🛒 КУПИТЬ ТРАКТОР (<span id="tractor-cost">5.00</span> $)
+                <span class="info-trigger" onclick="event.stopPropagation(); openInfo('Авто-Трактор', 'Автоматически вспахивает пустые грядки, высаживает семена текущего уровня и собирает созревший урожай на склад. Расходует 0.08 л топлива в секунду.')">[!]</span>
+            </button>
+            <div style="width:100%; display:flex; justify-content:space-between; font-size:11px; background:rgba(0,0,0,0.4); padding:8px; border-radius:8px; box-sizing:border-box; border: 1px solid #334155; align-items:center;">
+                <span>⛽ БАК ТРАКТОРОВ: <span id="fuel-display">100/100 л.</span></span>
+                <button class="info-trigger" style="margin:0;" onclick="openInfo('Бензобак', 'Топливо расходуется только тогда, когда тракторы активны. Если бак пуст (0 л), автоматизация полностью отключается, пока вы не заправитесь!')">[!]</button>
             </div>
-            <button id="refuel-btn" class="upgrade-btn" style="background:linear-gradient(135deg, #eab308, #ca8a04); border-color:#a16207;" onclick="refuelTractor()">⛽ ЗАПРАВИТЬ БАК ($0.50)</button>
-            <button id="ad-button" class="ad-btn" onclick="watchAdWithAntiCheat()">📺 СМОТРЕТЬ РЕКЛАМУ (+2.0$)</button>
+            <button id="refuel-btn" class="upgrade-btn" style="background:linear-gradient(135deg, #eab308, #ca8a04); border-color:#a16207;" onclick="refuelTractor()">
+                ⛽ ЗАПРАВИТЬ БАК ($0.50)
+                <span class="info-trigger" onclick="event.stopPropagation(); openInfo('Быстрая Заправка', 'Мгновенно заполняет бак до максимальной емкости. Стоимость фиксирована — всего 0.50$.')">[!]</span>
+            </button>
+            <button id="ad-button" class="ad-btn" onclick="watchAdWithAntiCheat()">
+                📺 СМОТРЕТЬ РЕКЛАМУ (+2.0$)
+                <span class="info-trigger" onclick="event.stopPropagation(); openInfo('Рекламный Спонсор', 'Просмотр короткого спонсорского ролика. Включает математическую анти-бот капчу для защиты экономики сервера.')">[!]</span>
+            </button>
         </div>
         <div id="tractor-status" style="font-size:12px; margin-top:6px; font-weight:bold; color: #94a3b8;">Количество тракторов: 0</div>
     </div>
@@ -233,7 +241,7 @@
 
         <div class="panel-title" style="margin-top:12px;">
             🏭 ПЕРЕРАБОТКА (ЗАВОД)
-            <button class="info-trigger" onclick="openInfo('Завод консервов', 'Перерабатывает любые 10 единиц овощей со склада в дорогие консервы 🥫. Консервы стоят в разы дороже обычного сырья!')">[!] Инфо</button>
+            <button class="info-trigger" onclick="openInfo('Завод консервов', 'Перерабатывает любые 10 единиц овощей со склада в дорогие консервы 🥫. Консервы стоят в разы дороже обычного сыรีย!')">[!] Инфо</button>
         </div>
         <div class="progress-bar"><div class="progress-fill" id="factory-bar" style="background:#a855f7;"></div><div class="progress-text" id="factory-text">Свободен</div></div>
         <div style="margin-bottom:6px; font-size:11px; color:#cbd5e1;">🥫 Готовая продукция на продажу: <span id="inv-processed">0</span> шт</div>
@@ -245,21 +253,30 @@
         </div>
         <div class="up-row" style="flex-direction: column; align-items: stretch; gap: 4px;">
             <div style="display: flex; justify-content: space-between;">
-                <span>🧴 Пестициды (Защита 1 ч.)</span>
+                <span>
+                    🧴 Пестициды (Защита 1 ч.)
+                    <button class="info-trigger" onclick="openInfo('Хим-Защита', 'Дает 1 час абсолютного иммунитета ко всем видам жуков. Цена прогрессирует в течение суток и сбрасывается ночью.')">[!]</button>
+                </span>
                 <span id="pest-use-count" style="color: #f59e0b; font-weight: bold;">Цена: 0$</span>
             </div>
             <button id="pest-buy-btn" class="pest-btn" onclick="buyPesticides()">Купить защиту</button>
         </div>
         <div class="up-row">
-            <span>🐕 Пёс-Охотник (20 зарядов)</span>
+            <span>
+                🐕 Пёс-Охотник (20 зарядов)
+                <button class="info-trigger" onclick="openInfo('Пёс-Охотник', 'Покупается за фиксированную сумму. Живет на ферме и автоматически ловит жуков в тот момент, когда они пытаются атаковать грядку. Тратит 1 заряд на жука.')">[!]</button>
+            </span>
             <button id="dog-buy-btn" class="dog-btn" onclick="buyDog()">Нанять ($15.0)</button>
         </div>
     </div>
 
     <div class="panel" id="content-achieve" style="display:none;">
         <div class="panel-title" style="color:#f59e0b; border-color:#f59e0b;">
-            🏆 РЕЙТИНГ И СЕЗОНЫ
+            🏆 ГЛОБАЛЬНЫЙ ТОП СЕЗОНА
             <button class="info-trigger" onclick="openInfo('Турнирные сезоны', 'Дневной ТОП обновляется каждую ночь в 00:00. Большой Недельный сезон сбрасывается в ночь на понедельник. Тапни на любого бота в списке, чтобы рассмотреть его ферму!')">[!] Инфо</button>
+        </div>
+        <div style="font-size:11px; background:rgba(0,0,0,0.2); padding:8px; border-radius:8px; margin-bottom:8px; line-height:1.4; font-weight: bold; text-align: center; color: #a855f7; border: 1px solid rgba(168,85,247,0.3);">
+            👥 Всего участников в сезоне: <span id="total-server-players">2 481 394</span>
         </div>
         <div style="font-size:11px; background:rgba(0,0,0,0.2); padding:8px; border-radius:8px; margin-bottom:8px; line-height:1.4;">
             ⏱️ Сброс Дневного топа: <b style="color:#f87171;" id="day-timer">00:00:00</b><br>
@@ -277,8 +294,8 @@
         <button class="prestige-btn" style="margin-bottom:12px;" onclick="triggerPrestige()">🧬 ПРОДАТЬ ФЕРМУ (Получить: <span id="prestige-gain">0</span> 🌟)</button>
 
         <div class="panel-title">🛠️ МОДЕРНИЗАЦИЯ ТЕХНИКИ</div>
-        <div class="up-row"><span>📦 Расширение Склада (+25 мест)</span><button class="upgrade-btn" onclick="upgrade('stock')"><span id="cost-u-stock">1.0</span>$</button></div>
-        <div class="up-row"><span>⚡ Ускорение Завода (+20% к пачке)</span><button class="upgrade-btn" onclick="upgrade('factory')"><span id="cost-u-fact">2.0</span>$</button></div>
+        <div class="up-row"><span>📦 Склад (+25 мест)</span><button class="upgrade-btn" onclick="upgrade('stock')"><span id="cost-u-stock">1.0</span>$</button></div>
+        <div class="up-row"><span>⚡ Ускорение Завода (+20%)</span><button class="upgrade-btn" onclick="upgrade('factory')"><span id="cost-u-fact">2.0</span>$</button></div>
         <div class="up-row"><span>⛽ Емкость бензобака (+50л)</span><button class="upgrade-btn" onclick="upgrade('fuel')"><span id="cost-u-fuel">1.5</span>$</button></div>
         
         <div class="panel-title" style="margin-top:12px;">
@@ -300,10 +317,12 @@
     const TRACTOR_BASE_COST = 5.0;
     const AD_REWARD = 2.0;
     
+    // Фейковое, но реалистичное число игроков в базе данных
+    const TOTAL_SERVER_PLAYERS_COUNT = 2481394;
+
     const BASE_REWARDS = { 1: 0.0005, 2: 0.0020, 3: 0.0100 };
     const BASE_TIMES   = { 1: 2000,   2: 4500,   3: 9000 };
 
-    // Шаблоны SVG иконок культур для грядок
     const SVG_ICONS = {
         sprout: `<svg class="plot-svg" viewBox="0 0 32 32"><path d="M16 28 V14 M16 16 Q22 10 26 12 Q24 18 16 18 M16 20 Q10 14 6 16 Q8 22 16 20" stroke="#4ade80" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`,
         carrot: `<svg class="plot-svg" viewBox="0 0 32 32"><path d="M16 6 C18 6 22 14 18 26 C16 30 14 30 13 26 C10 14 14 6 16 6" fill="#f97316"/><path d="M16 6 Q14 2 12 4 M16 6 Q16 1 17 3 M16 6 Q19 2 21 5" stroke="#22c55e" stroke-width="2" fill="none"/></svg>`,
@@ -375,7 +394,6 @@
             let baseNick = tempNicks[i % tempNicks.length];
             if (i >= tempNicks.length) baseNick += Math.random() > 0.5 ? "_77" : "7";
             
-            // Расширенная симуляция скрытых параметров ботов для профилей
             let bLvl = Math.floor(1 + Math.random() * 4);
             let bCrops = ["Морковь 🥕", "Помидоры 🍅", "Арбузы 🍉"];
             bots.push({ 
@@ -677,7 +695,6 @@
                         if(i<FREE_PLOTS || seeds>0) { 
                             if(i>=FREE_PLOTS) seeds--; 
                             const c=getCropData(i); 
-                            // 2% шанс на редкую мутацию плода при ручной посадке
                             let isMutated = Math.random() < 0.02;
                             plots[i]={status:'growing',icon:c.icon,type:c.type,duration:c.time,startTime:Date.now(), isMutated: isMutated}; 
                             save(); updateUI(); 
@@ -702,7 +719,6 @@
         if (stock[1]+stock[2]+stock[3] >= getMaxStock()) return;
         stock[plots[i].type]++;
         
-        // Множитель дохода: х5 за золотую мутацию плода
         let mutationMult = plots[i].isMutated ? 5 : 1;
         
         if (plots[i].isMutated && !isAuto) {
@@ -813,7 +829,6 @@
         document.getElementById('fuel-display').innerText = `${Math.max(0, currentFuel).toFixed(1)}/${getMaxFuel()} л.`;
         document.getElementById('tractor-status').innerText = `Количество тракторов: ${tractorsCount}`;
         
-        // Включение пульсации тревоги бензобака
         let refuelBtn = document.getElementById('refuel-btn');
         if(currentFuel <= 0 && tractorsCount > 0) { refuelBtn.className = "upgrade-btn fuel-alert-btn"; } 
         else { refuelBtn.className = "upgrade-btn"; }
@@ -853,9 +868,9 @@
             mTimerEl.style.color = "#2dd4bf";
         } else { mTimerEl.innerText = `🤖 Менеджер склада: Выкл`; mTimerEl.style.color = "#fff"; }
 
-        // Построение таблицы лидеров с привязкой вызова модального окна профиля ботов
+        // Генерация таблицы лидеров с подвалом о миллионах скрытых участников
         const all = bots.concat([{ name: playerName, money: maxScore, isPlayer: true }]).sort((a,b) => b.money - a.money);
-        document.getElementById('leaderboard').innerHTML = all.slice(0, 8).map((p, index) => {
+        let leaderboardHTML = all.slice(0, 8).map((p, index) => {
             let medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `#${index+1}`;
             if(p.isPlayer) {
                 return `<div class="leader-item player-row"><span>${medal} ${p.name} (Вы)</span><span>${p.money.toFixed(4)}$</span></div>`;
@@ -864,6 +879,11 @@
                 return `<div class="leader-item" onclick="openBotProfile(${botOrigIdx})"><span>${medal} ${p.name} ℹ️</span><span>${p.money.toFixed(4)}$</span></div>`;
             }
         }).join('');
+        
+        // Добавление заглушки "остальных участников" в подвал таблицы
+        let hiddenPlayersCount = TOTAL_SERVER_PLAYERS_COUNT - 8;
+        leaderboardHTML += `<div class="leader-item footer-row">... и ещё ${hiddenPlayersCount.toLocaleString('ru-RU')} игроков ниже в списке</div>`;
+        document.getElementById('leaderboard').innerHTML = leaderboardHTML;
 
         let pBns = `(+${prestigeSeeds*25}%)`;
         document.getElementById('p-bonus-c').innerText = prestigeSeeds > 0 ? pBns : '';
