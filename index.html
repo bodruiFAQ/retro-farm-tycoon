@@ -29,6 +29,7 @@
         .stats-container { display: flex; justify-content: center; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; width: 100%; max-width: 420px; margin: 0 auto; }
         .stat-box, .clock-box { font-size: 12px; font-weight: bold; background: #1e293b; padding: 6px 10px; border-radius: 30px; border: 2px solid #f59e0b; flex: 1 1 auto; min-width: 90px; box-shadow: inset 0 0 8px rgba(0,0,0,0.5); }
         .clock-box { border-color: #06b6d4; color: #06b6d4; background: #0f172a; }
+        .hud-stock-box { border-color: #a855f7; color: #e2e8f0; background: #2e1065; font-size: 11px; }
         
         .main-layout { display: flex; flex-direction: row; justify-content: center; gap: 12px; margin-top: 10px; flex-wrap: wrap; align-items: flex-start; }
         .panel { background: rgba(30, 41, 59, 0.85); padding: 16px; border-radius: 16px; border: 2px solid #475569; width: 100%; max-width: 360px; text-align: left; font-size: 13px; box-sizing: border-box; backdrop-filter: blur(8px); box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
@@ -41,23 +42,23 @@
         .soil-upgrade-btn { background: #059669; font-size: 9px; padding: 4px 2px; border-radius: 6px; border: 1px solid #047857; color: white; cursor: pointer; font-weight: bold; transition: background 0.2s; }
         .soil-upgrade-btn:hover { background: #10b981; }
         
-        .plot { aspect-ratio: 1 / 1; background: radial-gradient(#7c2d12, #451a03); border: 4px solid #78350f; border-radius: 20px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 6px 0 #451a03, 0 8px 16px rgba(0,0,0,0.4); box-sizing: border-box; position: relative; }
+        .plot { aspect-ratio: 1 / 1; background: radial-gradient(#7c2d12, #451a03); border: 4px solid #78350f; border-radius: 20px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 6px 0 #451a03, 0 8px 16px rgba(0,0,0,0.4); box-sizing: border-box; position: relative; overflow: hidden; }
         .plot:hover:not(.locked) { transform: scale(1.04); }
         .plot:active:not(.locked) { transform: translateY(4px); box-shadow: 0 2px 0 transparent; }
         
-        .growing { background: radial-gradient(#ea580c, #9a3412) !important; border-color: #ea580c !important; animation: pulseGrow 1.5s infinite alternate; }
-        @keyframes pulseGrow { from { opacity: 0.85; transform: scale(0.98); } to { opacity: 1; transform: scale(1.02); } }
+        .growing { background: radial-gradient(#ea580c, #9a3412) !important; border-color: #ea580c !important; }
         
         .ready { background: radial-gradient(#10b981, #047857) !important; border-color: #34d399 !important; animation: gleamReady 2s infinite; box-shadow: 0 0 15px rgba(16,185,129,0.6); }
         @keyframes gleamReady { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.25); } }
         
+        .mutated-ready { background: radial-gradient(#f59e0b, #b45309) !important; border-color: #fbbf24 !important; animation: goldGleam 1.5s infinite alternate; box-shadow: 0 0 20px #f59e0b; }
+        @keyframes goldGleam { from { filter: drop-shadow(0 0 2px #fff) brightness(1); } to { filter: drop-shadow(0 0 8px #fbbf24) brightness(1.3); } }
+
         .locked  { background: radial-gradient(#334155, #1e293b) !important; border-color: #475569 !important; box-shadow: none; opacity: 0.75; }
-        
-        /* Безопасная мягкая пульсация жука без тряски всего экрана */
         .bugged  { background: radial-gradient(#dc2626, #7f1d1d) !important; border-color: #ef4444 !important; animation: bugPulse 1.2s infinite alternate; }
         @keyframes bugPulse { from { filter: brightness(0.9); } to { filter: brightness(1.2); } }
 
-        .plot-label { background: rgba(0,0,0,0.7); padding: 2px 5px; border-radius: 6px; font-size: 10px; color: white; font-weight: bold; margin-top: 3px; text-align: center; }
+        .plot-label { background: rgba(0,0,0,0.7); padding: 2px 5px; border-radius: 6px; font-size: 10px; color: white; font-weight: bold; margin-top: 3px; text-align: center; z-index: 2; }
         
         .center-area { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 360px; }
         .btn-box { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 12px; width: 100%; }
@@ -73,24 +74,29 @@
         .upgrade-btn { background: linear-gradient(135deg, #10b981, #059669); border-bottom: 4px solid #047857; }
         .market-btn  { background: linear-gradient(135deg, #f97316, #ea580c); border-bottom: 4px solid #c2410c; }
         .ad-btn      { background: linear-gradient(135deg, #ef4444, #dc2626); border-bottom: 4px solid #991b1b; }
-        .factory-btn { background: linear-gradient(135deg, #a855f7, #8b5cf6); border-bottom: 4px solid #6d28d9; }
         .pest-btn    { background: linear-gradient(135deg, #3b82f6, #2563eb); border-bottom: 4px solid #1d4ed8; }
         .dog-btn     { background: linear-gradient(135deg, #eab308, #ca8a04); border-bottom: 4px solid #a16207; }
         .prestige-btn { background: linear-gradient(135deg, #f59e0b, #d97706); color: #0f172a; border-bottom: 4px solid #b45309; }
         .auto-btn    { background: linear-gradient(135deg, #14b8a6, #0d9488); border-bottom: 4px solid #0f766e; }
+        .factory-btn { background: linear-gradient(135deg, #a855f7, #8b5cf6); border-bottom: 4px solid #6d28d9; }
         
+        /* Анимация тревожной пульсации бензобака */
+        .fuel-alert-btn { animation: fuelAlert 0.8s infinite alternate !important; border-bottom-color: #b45309 !important; }
+        @keyframes fuelAlert { from { background: linear-gradient(135deg, #ea580c, #c2410c); transform: scale(1); } to { background: linear-gradient(135deg, #ef4444, #dc2626); transform: scale(1.03); box-shadow: 0 0 15px #ef4444; } }
+
         .panel-title { display: flex; justify-content: center; align-items: center; font-weight: bold; color: #f59e0b; border-bottom: 2px solid #f59e0b; padding-bottom: 4px; margin-bottom: 8px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .leader-item { display: flex; justify-content: space-between; padding: 6px 8px; border-bottom: 1px dashed rgba(255,255,255,0.1); align-items: center; font-size: 12px; border-radius: 6px; }
-        .player-row  { color: #f59e0b; font-weight: bold; background: rgba(245,158,11,0.15) !important; border: 1px solid rgba(245,158,11,0.3); }
+        .leader-item { display: flex; justify-content: space-between; padding: 6px 8px; border-bottom: 1px dashed rgba(255,255,255,0.1); align-items: center; font-size: 12px; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
+        .leader-item:hover:not(.player-row) { background: rgba(255,255,255,0.05); }
+        .player-row  { color: #f59e0b; font-weight: bold; background: rgba(245,158,11,0.15) !important; border: 1px solid rgba(245,158,11,0.3); cursor: default; }
         
-        .countdown { font-size: 10px; font-weight: bold; color: #f8fafc; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 6px; margin-top: 3px; }
+        .countdown { font-size: 10px; font-weight: bold; color: #f8fafc; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 6px; margin-top: 3px; z-index: 2; }
         .weather-box { font-size: 13px; font-weight: bold; background: rgba(59, 130, 246, 0.2); padding: 8px; border-radius: 10px; border: 1px solid #3b82f6; margin-bottom: 8px; text-align: center; width: 100%; box-sizing: border-box; box-shadow: 0 4px 10px rgba(59,130,246,0.2); }
         .pest-status-box { font-size: 11px; margin-bottom: 8px; background: rgba(16, 185, 129, 0.1); padding: 6px; border-radius: 10px; width: 100%; box-sizing: border-box; border: 1px dashed #10b981; display: flex; flex-direction: column; gap: 4px; align-items: center; }
 
         .quest-box { display: flex; flex-direction: column; gap: 6px; }
-        .quest-card { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); font-size: 12px; transition: all 0.2s; }
+        .quest-card { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); font-size: 12px; transition: all 0.2s; text-align: left; }
         .quest-card.ready-to-claim { border-color: #10b981; background: rgba(16, 185, 129, 0.12); }
-        .claim-btn { background: #10b981; color: white; border: none; padding: 6px 12px; font-size: 11px; font-weight: bold; border-radius: 6px; margin-top: 6px; cursor: pointer; transition: transform 0.1s; }
+        .claim-btn { background: #10b981; color: white; border: none; padding: 6px 12px; font-size: 11px; font-weight: bold; border-radius: 6px; margin-top: 6px; cursor: pointer; transition: transform 0.1s; width: 100%; }
         .claim-btn:active { transform: scale(0.95); }
         
         .progress-bar { background: #334155; border-radius: 8px; overflow: hidden; height: 16px; margin: 5px 0; position: relative; box-shadow: inset 0 2px 4px rgba(0,0,0,0.4); }
@@ -112,8 +118,11 @@
         .info-modal { border-color: #3b82f6; box-shadow: 0 0 25px rgba(59,130,246,0.6); }
         .info-modal h3 { color: #3b82f6; margin-top: 0; font-size: 16px; text-transform: uppercase; }
 
-        .plot svg { width: 45%; height: auto; transition: transform 0.3s; }
-        .plot:hover svg { transform: rotate(10deg) scale(1.1); }
+        /* Стили для SVG графики культур внутри грядок */
+        .plot-svg { width: 50%; height: 50%; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 1; }
+        .plot:hover .plot-svg { transform: scale(1.15) rotate(5deg); }
+        .growing .plot-svg { animation: plantGrow 1s ease-out; }
+        @keyframes plantGrow { from { transform: scale(0.3) translateY(10px); opacity: 0.5; } to { transform: scale(1) translateY(0); opacity: 1; } }
     </style>
 </head>
 <body>
@@ -125,6 +134,7 @@
     <div class="stat-box">💰 <span id="money">0.0000</span> $</div>
     <div class="stat-box">🌟 Золотые: <span id="prestige-seeds" style="color:#f59e0b;">0</span></div>
     <div class="stat-box">🌱 СЕМЕНА: <span id="seeds">30</span></div>
+    <div class="stat-box hud-stock-box">📦 СКЛАД: <span id="hud-stock-text" style="font-weight:bold; color:#a855f7;">0/50</span></div>
     <div class="clock-box">🕐 <span id="clock">00:00:00</span></div>
 </div>
 
@@ -148,6 +158,12 @@
     <button onclick="closeInfoModal()" style="background:#3b82f6; width:100%; padding:10px; border-radius:10px; border:none; color:white; font-weight:bold; cursor:pointer;">Понятно</button>
 </div>
 
+<div class="modal info-modal" id="bot-profile-modal">
+    <h3 id="bot-profile-title" style="color:#f59e0b;">Профиль игрока</h3>
+    <div id="bot-profile-body" style="font-size:13px; text-align:left; line-height:1.6; color:#cbd5e1; background:rgba(0,0,0,0.3); padding:12px; border-radius:10px; margin-bottom:12px;"></div>
+    <button onclick="document.getElementById('bot-profile-modal').style.display='none'; document.getElementById('modal-overlay').style.display='none';" style="background:#475569; width:100%; padding:10px; border-radius:10px; border:none; color:white; font-weight:bold; cursor:pointer;">Закрыть</button>
+</div>
+
 <div class="main-layout">
     
     <div class="center-area" id="content-farm">
@@ -169,7 +185,7 @@
                 <span>⛽ БАК ТРАКТОРА:</span>
                 <span id="fuel-display">100/100 л.</span>
             </div>
-            <button class="upgrade-btn" style="background:linear-gradient(135deg, #eab308, #ca8a04); border-color:#a16207;" onclick="refuelTractor()">⛽ ЗАПРАВИТЬ БАК ($0.50)</button>
+            <button id="refuel-btn" class="upgrade-btn" style="background:linear-gradient(135deg, #eab308, #ca8a04); border-color:#a16207;" onclick="refuelTractor()">⛽ ЗАПРАВИТЬ БАК ($0.50)</button>
             <button id="ad-button" class="ad-btn" onclick="watchAdWithAntiCheat()">📺 СМОТРЕТЬ РЕКЛАМУ (+2.0$)</button>
         </div>
         <div id="tractor-status" style="font-size:12px; margin-top:6px; font-weight:bold; color: #94a3b8;">Количество тракторов: 0</div>
@@ -243,13 +259,13 @@
     <div class="panel" id="content-achieve" style="display:none;">
         <div class="panel-title" style="color:#f59e0b; border-color:#f59e0b;">
             🏆 РЕЙТИНГ И СЕЗОНЫ
-            <button class="info-trigger" onclick="openInfo('Турнирные сезоны', 'Дневной ТОП обновляется каждую ночь в 00:00. Большой Недельный сезон сбрасывается в ночь на понедельник. Побеждай ботов и забирай Золотые семена и купоны менеджера!')">[!] Инфо</button>
+            <button class="info-trigger" onclick="openInfo('Турнирные сезоны', 'Дневной ТОП обновляется каждую ночь в 00:00. Большой Недельный сезон сбрасывается в ночь на понедельник. Тапни на любого бота в списке, чтобы рассмотреть его ферму!')">[!] Инфо</button>
         </div>
         <div style="font-size:11px; background:rgba(0,0,0,0.2); padding:8px; border-radius:8px; margin-bottom:8px; line-height:1.4;">
             ⏱️ Сброс Дневного топа: <b style="color:#f87171;" id="day-timer">00:00:00</b><br>
             ⏱️ Конец Недельного сезона: <b style="color:#f87171;" id="week-timer">0 дней 00:00</b>
         </div>
-        <div id="leaderboard" style="margin-bottom:15px; display:flex; flex-direction:column; gap:2px;"></div>
+        <div id="leaderboard" style="margin-bottom:15px; display:flex; flex-direction:column; gap:4px;"></div>
 
         <div class="panel-title" style="color:#ef4444; border-color:#ef4444;">
             ⭐ КОРПОРАЦИЯ (ПРЕСТИЖ)
@@ -287,6 +303,14 @@
     const BASE_REWARDS = { 1: 0.0005, 2: 0.0020, 3: 0.0100 };
     const BASE_TIMES   = { 1: 2000,   2: 4500,   3: 9000 };
 
+    // Шаблоны SVG иконок культур для грядок
+    const SVG_ICONS = {
+        sprout: `<svg class="plot-svg" viewBox="0 0 32 32"><path d="M16 28 V14 M16 16 Q22 10 26 12 Q24 18 16 18 M16 20 Q10 14 6 16 Q8 22 16 20" stroke="#4ade80" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`,
+        carrot: `<svg class="plot-svg" viewBox="0 0 32 32"><path d="M16 6 C18 6 22 14 18 26 C16 30 14 30 13 26 C10 14 14 6 16 6" fill="#f97316"/><path d="M16 6 Q14 2 12 4 M16 6 Q16 1 17 3 M16 6 Q19 2 21 5" stroke="#22c55e" stroke-width="2" fill="none"/></svg>`,
+        tomato: `<svg class="plot-svg" viewBox="0 0 32 32"><circle cx="16" cy="18" r="10" fill="#ef4444"/><path d="M16 8 Q16 4 14 5 M16 8 Q19 5 18 6 M16 8 L16 5" stroke="#22c55e" stroke-width="2" fill="none"/><circle cx="13" cy="14" r="1.5" fill="#fca5a5" opacity="0.6"/></svg>`,
+        watermelon: `<svg class="plot-svg" viewBox="0 0 32 32"><ellipse cx="16" cy="17" rx="11" ry="9" fill="#15803d"/><path d="M8 14 Q12 22 16 14 Q20 22 24 13" stroke="#166534" stroke-width="1.5" fill="none"/><path d="M11 11 Q15 19 19 11" stroke="#166534" stroke-width="1.5" fill="none"/></svg>`
+    };
+
     const WEATHER_TYPES = [
         { name: "Солнечно ☀️", income: 1.2, speed: 1.0 },
         { name: "Дождь 🌧️", income: 1.0, speed: 0.5 },
@@ -296,7 +320,6 @@
 
     const PEST_PRICES = [0, 1.0, 3.0, 8.0, 20.0];
 
-    // Настоящие, живые игровые никнеймы как у обычных игроков
     const REALISTIC_NICKNAMES = [
         "Wanderer", "Danil_04", "Alina_K", "Skif", "Maks_Play", "Mr_Zheka", "Ivan_Grozny",
         "Liza_Fox", "Serega", "Kira", "DeamON", "Lucky_Boy", "Artem_2012", "Dimas", "Nikitka",
@@ -347,24 +370,27 @@
     let bots = JSON.parse(localStorage.getItem('mx_generated_bots_v4'));
     if (!bots) {
         bots = [];
-        // Создаем пул уникальных реалистичных ников для ботов
         let tempNicks = [...REALISTIC_NICKNAMES].sort(() => Math.random() - 0.5);
         for(let i=1; i<=99; i++) {
             let baseNick = tempNicks[i % tempNicks.length];
-            // Добавляем легкое разнообразие, если массив закончился
-            if (i >= tempNicks.length) {
-                baseNick += Math.random() > 0.5 ? "_77" : "7";
-            }
+            if (i >= tempNicks.length) baseNick += Math.random() > 0.5 ? "_77" : "7";
+            
+            // Расширенная симуляция скрытых параметров ботов для профилей
+            let bLvl = Math.floor(1 + Math.random() * 4);
+            let bCrops = ["Морковь 🥕", "Помидоры 🍅", "Арбузы 🍉"];
             bots.push({ 
                 name: baseNick, 
                 money: 0.0, 
-                baseIncome: parseFloat((0.00003 + Math.random() * 0.00007).toFixed(6))
+                baseIncome: parseFloat((0.00003 + Math.random() * 0.00007).toFixed(6)),
+                simLevel: bLvl,
+                simTractors: Math.floor(Math.random() * bLvl) + 1,
+                simCrop: bCrops[Math.floor(Math.random() * bCrops.length)]
             });
         }
         localStorage.setItem('mx_generated_bots_v4', JSON.stringify(bots));
     }
 
-    const plots = Array(9).fill(null).map(() => ({ status: 'empty', startTime: 0, duration: 0, icon: '', type: 1 }));
+    const plots = Array(9).fill(null).map(() => ({ status: 'empty', startTime: 0, duration: 0, icon: 'sprout', type: 1, isMutated: false }));
     let gridElement;
 
     function openInfo(title, text) {
@@ -376,13 +402,30 @@
 
     function closeInfoModal() {
         document.getElementById('info-modal').style.display = 'none';
-        if (document.getElementById('offline-modal').style.display !== 'block') {
+        if (document.getElementById('offline-modal').style.display !== 'block' && document.getElementById('bot-profile-modal').style.display !== 'block') {
             document.getElementById('modal-overlay').style.display = 'none';
         }
     }
 
+    function openBotProfile(index) {
+        let b = bots[index];
+        if(!b) return;
+        document.getElementById('bot-profile-title').innerText = `🌾 Карточка фермера`;
+        document.getElementById('bot-profile-body').innerHTML = `
+            <b>Никнейм:</b> <span style="color:#f59e0b;">${b.name}</span><br>
+            <b>Текущий ранг:</b> Уровень ${b.simLevel}<br>
+            <b>Тракторов в ангаре:</b> 🚜 ${b.simTractors} шт.<br>
+            <b>Любимая культура:</b> ${b.simCrop}<br>
+            <b>Заработано за сезон:</b> ${b.money.toFixed(4)}$<br><br>
+            <i style="color:#94a3b8; font-size:11px;">*Этот игрок находится в вашей турнирной группе. Прогресс обновляется раз в секунду.</i>
+        `;
+        document.getElementById('modal-overlay').style.display = 'block';
+        document.getElementById('bot-profile-modal').style.display = 'block';
+    }
+
     function closeActiveModals() {
         closeInfoModal();
+        document.getElementById('bot-profile-modal').style.display = 'none';
     }
 
     function getPrestigeMultiplier() { return 1 + (prestigeSeeds * 0.25); }
@@ -429,9 +472,9 @@
         let soilLvl = soilLevels[plotIndex] || 1;
         let speedBonus = 1 - (Math.min(14, soilLvl - 1) * 0.05);
         recalculateLevel();
-        if (level >= 4) return { type: 3, icon: '🍉', time: BASE_TIMES[3] * currentWeather.speed * speedBonus };
-        if (level >= 3) return { type: 2, icon: '🍅', time: BASE_TIMES[2] * currentWeather.speed * speedBonus };
-        return                 { type: 1, icon: '🥕', time: BASE_TIMES[1] * currentWeather.speed * speedBonus };
+        if (level >= 4) return { type: 3, icon: 'watermelon', time: BASE_TIMES[3] * currentWeather.speed * speedBonus };
+        if (level >= 3) return { type: 2, icon: 'tomato', time: BASE_TIMES[2] * currentWeather.speed * speedBonus };
+        return                 { type: 1, icon: 'carrot', time: BASE_TIMES[1] * currentWeather.speed * speedBonus };
     }
 
     function switchTab(tabName) {
@@ -490,7 +533,6 @@
         let lastWeekReset = parseInt(localStorage.getItem('mx_last_week_reset')) || 0;
         
         let startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-        
         let dayOfWeek = now.getDay(); 
         let diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
         let startOfThisWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday).getTime();
@@ -571,11 +613,11 @@
 
     function generateRandomQuest(slotIndex) {
         const questTypes = [
-            { id: 'harvest', text: 'Собрать урожай с грядок', baseTarget: 15, rewMoney: 0.15, rewSeeds: 8 }, 
-            { id: 'bugs', text: 'Раздавить вредителей 🐛', baseTarget: 3, rewMoney: 0.30, rewSeeds: 12 }
+            { id: 'harvest', text: 'Поставка в ресторан: собрать урожай', baseTarget: 20, rewMoney: 0.20, rewSeeds: 10, rewCoupon: 1 }, 
+            { id: 'bugs', text: 'Уничтожить вредителей на поле 🐛', baseTarget: 4, rewMoney: 0.35, rewSeeds: 15, rewCoupon: 0 }
         ];
         let type = questTypes[Math.floor(Math.random() * questTypes.length)];
-        activeQuests[slotIndex] = { type: type.id, text: type.text, current: 0, target: type.baseTarget, rewMoney: type.rewMoney, rewSeeds: type.rewSeeds, claimed: false };
+        activeQuests[slotIndex] = { type: type.id, text: type.text, current: 0, target: type.baseTarget, rewMoney: type.rewMoney, rewSeeds: type.rewSeeds, rewCoupon: type.rewCoupon, claimed: false };
     }
 
     function initQuestsSystem() { if (activeQuests.length === 0) { for (let i = 0; i < 3; i++) { generateRandomQuest(i); } save(); } }
@@ -588,7 +630,9 @@
     function claimQuestReward(index) {
         let q = activeQuests[index];
         if (q.current >= q.target && !q.claimed) {
-            money += q.rewMoney; seeds += q.rewSeeds; q.claimed = true;
+            money += q.rewMoney; seeds += q.rewSeeds; 
+            if (q.rewCoupon > 0) autoCoupons += q.rewCoupon;
+            q.claimed = true;
             generateRandomQuest(index); save(); updateUI();
         }
     }
@@ -628,19 +672,24 @@
                         progressQuest('bugs', 1); save(); updateUI(); 
                     };
                 } else if (plot.status === 'empty') {
-                    div.innerHTML = `<svg viewBox="0 0 44 38"><path d="M2 31 Q9 16 22 14 Q35 16 42 31 Z" fill="#653b1b"/></svg><div class="plot-label">ПОСАДИТЬ</div>`;
+                    div.innerHTML = `<svg viewBox="0 0 44 38" style="width:40%;"><path d="M2 31 Q9 16 22 14 Q35 16 42 31 Z" fill="#5c2e0b"/></svg><div class="plot-label">ПОСАДИТЬ</div>`;
                     div.onclick = function() { 
                         if(i<FREE_PLOTS || seeds>0) { 
                             if(i>=FREE_PLOTS) seeds--; 
                             const c=getCropData(i); 
-                            plots[i]={status:'growing',icon:c.icon,type:c.type,duration:c.time,startTime:Date.now()}; 
+                            // 2% шанс на редкую мутацию плода при ручной посадке
+                            let isMutated = Math.random() < 0.02;
+                            plots[i]={status:'growing',icon:c.icon,type:c.type,duration:c.time,startTime:Date.now(), isMutated: isMutated}; 
                             save(); updateUI(); 
                         } 
                     };
                 } else if (plot.status === 'growing') {
-                    div.className += ' growing'; div.innerHTML = `<span style="font-size:24px;">${plot.icon}</span><div class="countdown" id="countdown-${i}">...</div>`;
+                    div.className += ' growing'; 
+                    div.innerHTML = SVG_ICONS.sprout + `<div class="countdown" id="countdown-${i}">...</div>`;
                 } else if (plot.status === 'ready') {
-                    div.className += ' ready'; div.innerHTML = `<span style="font-size:28px;">${plot.icon}</span><div class="plot-label">СБОР ✨</div>`;
+                    let isMut = plots[i].isMutated;
+                    div.className += isMut ? ' mutated-ready' : ' ready'; 
+                    div.innerHTML = SVG_ICONS[plot.icon] + `<div class="plot-label">${isMut ? '⭐ ЗОЛОТО x5' : 'СБОР ✨'}</div>`;
                     div.onclick = function(e) { harvest(i, false, e); };
                 }
                 container.appendChild(div);
@@ -652,11 +701,19 @@
     function harvest(i, isAuto, event) {
         if (stock[1]+stock[2]+stock[3] >= getMaxStock()) return;
         stock[plots[i].type]++;
-        if (!isAuto && Math.random() < (0.12 + soilLevels[i]*0.02)) {
+        
+        // Множитель дохода: х5 за золотую мутацию плода
+        let mutationMult = plots[i].isMutated ? 5 : 1;
+        
+        if (plots[i].isMutated && !isAuto) {
+            let bonus = getCropPrice(plots[i].type) * 5; money += bonus; maxScore = Math.max(maxScore, money);
+            if(event && event.clientX) showCritText(event.clientX, event.clientY, `👑 МУТАЦИЯ +${bonus.toFixed(4)}$!`);
+        } else if (!isAuto && Math.random() < (0.12 + soilLevels[i]*0.02)) {
             let bonus = getCropPrice(plots[i].type) * 6; money += bonus; maxScore = Math.max(maxScore, money);
             if(event && event.clientX) { showCritText(event.clientX, event.clientY, `✨ КРИТ +${bonus.toFixed(4)}$!`); }
         }
-        plots[i] = { status: 'empty', startTime: 0, duration: 0, icon: '', type: 1 };
+        
+        plots[i] = { status: 'empty', startTime: 0, duration: 0, icon: 'sprout', type: 1, isMutated: false };
         progressQuest('harvest', 1); save(); updateUI();
     }
 
@@ -746,6 +803,7 @@
         
         let tStock = stock[1] + stock[2] + stock[3]; let mStock = getMaxStock();
         document.getElementById('stock-bar').style.width = (tStock/mStock*100) + '%'; document.getElementById('stock-text').innerText = `${tStock}/${mStock}`;
+        document.getElementById('hud-stock-text').innerText = `${tStock}/${mStock}`;
         document.getElementById('inv-carrot').innerText = stock[1]; document.getElementById('inv-tomato').innerText = stock[2]; document.getElementById('inv-watermelon').innerText = stock[3]; document.getElementById('inv-processed').innerText = processedStock;
 
         if (isFactoryRunning) { document.getElementById('factory-bar').style.width = factoryProgress + '%'; document.getElementById('factory-text').innerText = `Консервирование... ${Math.floor(factoryProgress)}%`; } 
@@ -755,6 +813,11 @@
         document.getElementById('fuel-display').innerText = `${Math.max(0, currentFuel).toFixed(1)}/${getMaxFuel()} л.`;
         document.getElementById('tractor-status').innerText = `Количество тракторов: ${tractorsCount}`;
         
+        // Включение пульсации тревоги бензобака
+        let refuelBtn = document.getElementById('refuel-btn');
+        if(currentFuel <= 0 && tractorsCount > 0) { refuelBtn.className = "upgrade-btn fuel-alert-btn"; } 
+        else { refuelBtn.className = "upgrade-btn"; }
+
         document.getElementById('price-c').innerText = getCropPrice(1).toFixed(4); 
         document.getElementById('price-t').innerText = getCropPrice(2).toFixed(4); 
         document.getElementById('price-w').innerText = getCropPrice(3).toFixed(4); 
@@ -790,10 +853,16 @@
             mTimerEl.style.color = "#2dd4bf";
         } else { mTimerEl.innerText = `🤖 Менеджер склада: Выкл`; mTimerEl.style.color = "#fff"; }
 
+        // Построение таблицы лидеров с привязкой вызова модального окна профиля ботов
         const all = bots.concat([{ name: playerName, money: maxScore, isPlayer: true }]).sort((a,b) => b.money - a.money);
         document.getElementById('leaderboard').innerHTML = all.slice(0, 8).map((p, index) => {
             let medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `#${index+1}`;
-            return `<div class="leader-item ${p.isPlayer?'player-row':''}"><span>${medal} ${p.name}</span><span>${p.money.toFixed(4)}$</span></div>`;
+            if(p.isPlayer) {
+                return `<div class="leader-item player-row"><span>${medal} ${p.name} (Вы)</span><span>${p.money.toFixed(4)}$</span></div>`;
+            } else {
+                let botOrigIdx = bots.findIndex(b => b.name === p.name);
+                return `<div class="leader-item" onclick="openBotProfile(${botOrigIdx})"><span>${medal} ${p.name} ℹ️</span><span>${p.money.toFixed(4)}$</span></div>`;
+            }
         }).join('');
 
         let pBns = `(+${prestigeSeeds*25}%)`;
@@ -804,9 +873,13 @@
         let tr = document.getElementById('market-trend'); tr.innerText = lastTrend === 'up' ? '📈 РОСТ' : '📉 СПАД'; tr.className = 'trend ' + (lastTrend === 'up' ? 'trend-up' : 'trend-down');
 
         document.getElementById('quests-container').innerHTML = activeQuests.map((q, idx) => {
+            let rewardText = `🎁 +${q.rewMoney}$ / +${q.rewSeeds} семян`;
+            if (q.rewCoupon > 0) rewardText += ` / +${q.rewCoupon} 🎫`;
             return `<div class="quest-card ${q.current>=q.target?'ready-to-claim':''}">
-                <span>📋 Квест: ${q.text} (${q.current}/${q.target})</span>
-                ${q.current >= q.target && !q.claimed ? `<br><button class="claim-btn" onclick="claimQuestReward(${idx})">🎁 Получить награду</button>` : ''}
+                <div style="font-weight:bold; margin-bottom:3px; color:${q.current>=q.target?'#10b981':'#e2e8f0'};">${q.text}</div>
+                <div style="font-size:11px; color:#94a3b8; margin-bottom:5px;">Прогресс: ${q.current}/${q.target}</div>
+                <div style="font-size:11px; color:#fbbf24;">Награда: ${rewardText}</div>
+                ${q.current >= q.target && !q.claimed ? `<button class="claim-btn" onclick="claimQuestReward(${idx})">Забрать награду</button>` : ''}
             </div>`;
         }).join('');
 
@@ -821,6 +894,7 @@
         localStorage.setItem('mx_up_stock', upStockLvl); localStorage.setItem('mx_up_fact', upFactLvl); localStorage.setItem('mx_up_fuel', upFuelLvl); localStorage.setItem('mx_fuel', currentFuel);
         localStorage.setItem('mx_prestige_seeds', prestigeSeeds); localStorage.setItem('mx_soil_lvls', JSON.stringify(soilLevels));
         localStorage.setItem('mx_auto_coupons', autoCoupons); localStorage.setItem('mx_manager_until', managerUntil); localStorage.setItem('mx_manager_reset_day', managerLastResetDay);
+        localStorage.setItem('mx_active_quests', JSON.stringify(activeQuests));
         localStorage.setItem('mx_last_save_time', Date.now());
     }
 
@@ -864,7 +938,7 @@
                         if (i < FREE_PLOTS || seeds > 0) { 
                             if(i>=FREE_PLOTS) seeds--; 
                             const c=getCropData(i); 
-                            plots[i]={status:'growing',icon:c.icon,type:c.type,duration:c.time,startTime:Date.now()}; 
+                            plots[i]={status:'growing',icon:c.icon,type:c.type,duration:c.time,startTime:Date.now(), isMutated: false}; 
                         }
                     }
                 }
