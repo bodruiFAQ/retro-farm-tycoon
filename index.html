@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none">
-    <title>IDLE FARM EMPIRE: TOURNAMENTS & AUTOMATION</title>
+    <title>IDLE FARM EMPIRE: ULTIMATE EVOLUTION</title>
     <style>
         body { 
-            background: linear-gradient(135deg, #111e36 0%, #1c355e 100%); 
-            color: white; 
-            font-family: Arial, sans-serif; 
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); 
+            color: #f1f5f9; 
+            font-family: 'Segoe UI', Arial, sans-serif; 
             text-align: center; 
             padding: 10px; 
             margin: 0; 
@@ -16,86 +16,107 @@
             user-select: none;
             -webkit-user-select: none;
         }
-        h1 { font-size: 20px; margin: 5px 0; color: #f1c40f; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        h1 { font-size: 24px; margin: 5px 0; color: #f59e0b; text-shadow: 0 0 12px rgba(245,158,11,0.4); animation: pulseTitle 2s infinite alternate; }
+        @keyframes pulseTitle { from { transform: scale(1); } to { transform: scale(1.03); } }
         
-        .tabs-container { display: flex; justify-content: center; gap: 5px; margin: 10px auto; max-width: 400px; }
-        .tab-btn { flex: 1; background: #2c3e50; border: 2px solid #34495e; color: #bdc3c7; padding: 8px 5px; font-size: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .tab-btn.active { background: #3498db; border-color: #f1c40f; color: white; }
+        .player-badge { background: linear-gradient(90deg, #3b82f6, #8b5cf6); padding: 4px 12px; border-radius: 20px; display: inline-block; font-size: 12px; font-weight: bold; margin-bottom: 10px; box-shadow: 0 0 10px rgba(139,92,246,0.4); }
 
-        .stats-container { display: flex; justify-content: center; gap: 4px; margin-bottom: 5px; flex-wrap: wrap; width: 100%; max-width: 400px; margin: 0 auto; }
-        .stat-box, .clock-box { font-size: 11px; font-weight: bold; background: #2c3e50; padding: 5px 8px; border-radius: 30px; border: 2px solid #f1c40f; flex: 1 1 auto; min-width: 80px; }
-        .clock-box { border-color: #5dade2; color: #5dade2; background: #1a2740; }
+        .tabs-container { display: flex; justify-content: center; gap: 6px; margin: 10px auto; max-width: 420px; }
+        .tab-btn { flex: 1; background: #1e293b; border: 2px solid #334155; color: #94a3b8; padding: 10px 5px; font-size: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .tab-btn:hover { background: #334155; color: white; transform: translateY(-1px); }
+        .tab-btn.active { background: #2563eb; border-color: #f59e0b; color: white; box-shadow: 0 0 12px rgba(37,99,235,0.5); }
+
+        .stats-container { display: flex; justify-content: center; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; width: 100%; max-width: 420px; margin: 0 auto; }
+        .stat-box, .clock-box { font-size: 12px; font-weight: bold; background: #1e293b; padding: 6px 10px; border-radius: 30px; border: 2px solid #f59e0b; flex: 1 1 auto; min-width: 90px; box-shadow: inset 0 0 8px rgba(0,0,0,0.5); }
+        .clock-box { border-color: #06b6d4; color: #06b6d4; background: #0f172a; }
         
         .main-layout { display: flex; flex-direction: row; justify-content: center; gap: 12px; margin-top: 10px; flex-wrap: wrap; align-items: flex-start; }
-        .panel { background: rgba(44, 62, 80, 0.9); padding: 14px; border-radius: 14px; border: 2px solid #34495e; width: 100%; max-width: 340px; text-align: left; font-size: 13px; box-sizing: border-box; }
+        .panel { background: rgba(30, 41, 59, 0.85); padding: 16px; border-radius: 16px; border: 2px solid #475569; width: 100%; max-width: 360px; text-align: left; font-size: 13px; box-sizing: border-box; backdrop-filter: blur(8px); box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
         
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; justify-content: center; width: 100%; max-width: 340px; margin: 0 auto; }
-        .plot-container { display: flex; flex-direction: column; gap: 3px; }
-        .soil-upgrade-btn { background: #27ae60; font-size: 9px; padding: 2px; border-radius: 4px; border: 1px solid #1e7e34; color: white; cursor: pointer; font-weight: bold; }
-        .plot { aspect-ratio: 1 / 1; background: radial-gradient(#a0522d, #5c2c16); border: 4px solid #3d1c0e; border-radius: 18px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.1s ease; box-shadow: 0 4px 0 #261108; box-sizing: border-box; position: relative; }
-        .plot:active { transform: translateY(4px); box-shadow: 0 0px 0 transparent; }
+        .info-hint { background: rgba(59, 130, 246, 0.15); border-left: 3px solid #3b82f6; padding: 6px; font-size: 11px; color: #93c5fd; margin-bottom: 8px; border-radius: 0 6px 6px 0; line-height: 1.3; }
+
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; justify-content: center; width: 100%; max-width: 360px; margin: 0 auto; }
+        .plot-container { display: flex; flex-direction: column; gap: 4px; }
+        .soil-upgrade-btn { background: #059669; font-size: 9px; padding: 4px 2px; border-radius: 6px; border: 1px solid #047857; color: white; cursor: pointer; font-weight: bold; transition: background 0.2s; }
+        .soil-upgrade-btn:hover { background: #10b981; }
         
-        .growing { background: radial-gradient(#d35400, #a04000) !important; border-color: #783000 !important; }
-        .ready   { background: radial-gradient(#2ecc71, #27ae60) !important; border-color: #1e7e34 !important; }
-        .locked  { background: radial-gradient(#4a4a4a, #2a2a2a) !important; border-color: #555 !important; }
-        .bugged  { background: radial-gradient(#c0392b, #7f8c8d) !important; border-color: #962d22 !important; animation: shake 0.3s infinite; }
+        .plot { aspect-ratio: 1 / 1; background: radial-gradient(#7c2d12, #451a03); border: 4px solid #78350f; border-radius: 20px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 6px 0 #451a03, 0 8px 16px rgba(0,0,0,0.4); box-sizing: border-box; position: relative; }
+        .plot:hover:not(.locked) { transform: scale(1.04); }
+        .plot:active:not(.locked) { transform: translateY(4px); box-shadow: 0 2px 0 transparent; }
+        
+        .growing { background: radial-gradient(#ea580c, #9a3412) !important; border-color: #ea580c !important; animation: pulseGrow 1.5s infinite alternate; }
+        @keyframes pulseGrow { from { opacity: 0.85; transform: scale(0.98); } to { opacity: 1; transform: scale(1.02); } }
+        
+        .ready { background: radial-gradient(#10b981, #047857) !important; border-color: #34d399 !important; animation: gleamReady 2s infinite; box-shadow: 0 0 15px rgba(16,185,129,0.6); }
+        @keyframes gleamReady { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.25); } }
+        
+        .locked  { background: radial-gradient(#334155, #1e293b) !important; border-color: #475569 !important; box-shadow: none; opacity: 0.75; }
+        .bugged  { background: radial-gradient(#dc2626, #7f1d1d) !important; border-color: #ef4444 !important; animation: shake 0.2s infinite; }
         
         @keyframes shake { 0%, 100% { transform: translate(0, 0); } 20%, 60% { transform: translate(-2px, 1px); } 40%, 80% { transform: translate(2px, -1px); } }
-        .plot-label { background: rgba(0,0,0,0.6); padding: 2px 4px; border-radius: 6px; font-size: 10px; color: white; font-weight: bold; margin-top: 2px; text-align: center; }
+        .plot-label { background: rgba(0,0,0,0.7); padding: 2px 5px; border-radius: 6px; font-size: 10px; color: white; font-weight: bold; margin-top: 3px; text-align: center; }
         
-        .center-area { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 340px; }
-        .btn-box { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 10px; width: 100%; }
-        button { border: none; color: white; padding: 12px 14px; font-size: 13px; font-weight: bold; border-radius: 10px; cursor: pointer; width: 100%; transition: opacity 0.2s; box-sizing: border-box; }
-        button:hover { opacity: 0.9; }
-        button:disabled { background: #555 !important; cursor: not-allowed; opacity: 0.6; box-shadow: none !important; transform: none !important; }
+        .center-area { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 360px; }
+        .btn-box { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 12px; width: 100%; }
         
-        .upgrade-btn { background: linear-gradient(#2ecc71, #27ae60); box-shadow: 0 4px 0 #1e7e34; }
-        .market-btn  { background: linear-gradient(#e67e22, #d35400); box-shadow: 0 4px 0 #a04000; }
-        .ad-btn      { background: linear-gradient(#e74c3c, #c0392b); box-shadow: 0 4px 0 #962d22; }
-        .factory-btn { background: linear-gradient(#9b59b6, #8e44ad); box-shadow: 0 4px 0 #6d3284; }
-        .pest-btn    { background: linear-gradient(#3498db, #2980b9); box-shadow: 0 4px 0 #21618c; }
-        .dog-btn     { background: linear-gradient(#f39c12, #d35400); box-shadow: 0 4px 0 #a04000; }
-        .prestige-btn { background: linear-gradient(#f1c40f, #f39c12); color: #111e36; box-shadow: 0 4px 0 #b7950b; }
-        .auto-btn    { background: linear-gradient(#1abc9c, #16a085); box-shadow: 0 4px 0 #117a65; }
+        button:not(.tab-btn):not(.soil-upgrade-btn):not(.claim-btn) { 
+            border: none; color: white; padding: 14px; font-size: 13px; font-weight: bold; border-radius: 12px; cursor: pointer; width: 100%; 
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-sizing: border-box; position: relative; overflow: hidden;
+        }
+        button:not(.tab-btn):not(.soil-upgrade-btn):not(.claim-btn):hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 6px 12px rgba(0,0,0,0.3); }
+        button:not(.tab-btn):not(.soil-upgrade-btn):not(.claim-btn):active:not(:disabled) { transform: translateY(2px); }
+        button:disabled { background: #475569 !important; cursor: not-allowed; opacity: 0.5; box-shadow: none !important; transform: none !important; }
         
-        .panel-title { font-weight: bold; color: #f1c40f; border-bottom: 1px solid #f1c40f; padding-bottom: 3px; margin-bottom: 6px; font-size: 14px; text-align: center; }
-        .leader-item { display: flex; justify-space: space-between; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed rgba(255,255,255,0.1); align-items: center; }
-        .player-row  { color: #f1c40f; font-weight: bold; background: rgba(241,196,15,0.2); border-radius: 4px; padding: 2px 4px; }
+        .upgrade-btn { background: linear-gradient(135deg, #10b981, #059669); border-bottom: 4px solid #047857; }
+        .market-btn  { background: linear-gradient(135deg, #f97316, #ea580c); border-bottom: 4px solid #c2410c; }
+        .ad-btn      { background: linear-gradient(135deg, #ef4444, #dc2626); border-bottom: 4px solid #991b1b; }
+        .factory-btn { background: linear-gradient(135deg, #a855f7, #8b5cf6); border-bottom: 4px solid #6d28d9; }
+        .pest-btn    { background: linear-gradient(135deg, #3b82f6, #2563eb); border-bottom: 4px solid #1d4ed8; }
+        .dog-btn     { background: linear-gradient(135deg, #eab308, #ca8a04); border-bottom: 4px solid #a16207; }
+        .prestige-btn { background: linear-gradient(135deg, #f59e0b, #d97706); color: #0f172a; border-bottom: 4px solid #b45309; }
+        .auto-btn    { background: linear-gradient(135deg, #14b8a6, #0d9488); border-bottom: 4px solid #0f766e; }
         
-        .countdown { font-size: 9px; font-weight: bold; color: #ecf0f1; background: rgba(0,0,0,0.55); padding: 1px 4px; border-radius: 6px; margin-top: 2px; }
-        .weather-box { font-size: 12px; font-weight: bold; background: rgba(52, 152, 219, 0.3); padding: 6px; border-radius: 8px; border: 1px solid #3498db; margin-bottom: 6px; text-align: center; width: 100%; box-sizing: border-box; }
-        .pest-status-box { font-size: 11px; margin-bottom: 6px; background: rgba(46, 204, 113, 0.15); padding: 5px; border-radius: 8px; width: 100%; box-sizing: border-box; border: 1px dashed #2ecc71; display: flex; flex-direction: column; gap: 4px; align-items: center; }
+        .panel-title { font-weight: bold; color: #f59e0b; border-bottom: 2px solid #f59e0b; padding-bottom: 4px; margin-bottom: 8px; font-size: 14px; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; }
+        .leader-item { display: flex; justify-content: space-between; padding: 6px 8px; border-bottom: 1px dashed rgba(255,255,255,0.1); align-items: center; font-size: 12px; border-radius: 6px; }
+        .player-row  { color: #f59e0b; font-weight: bold; background: rgba(245,158,11,0.15) !important; border: 1px solid rgba(245,158,11,0.3); }
+        
+        .countdown { font-size: 10px; font-weight: bold; color: #f8fafc; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 6px; margin-top: 3px; }
+        .weather-box { font-size: 13px; font-weight: bold; background: rgba(59, 130, 246, 0.2); padding: 8px; border-radius: 10px; border: 1px solid #3b82f6; margin-bottom: 8px; text-align: center; width: 100%; box-sizing: border-box; box-shadow: 0 4px 10px rgba(59,130,246,0.2); }
+        .pest-status-box { font-size: 11px; margin-bottom: 8px; background: rgba(16, 185, 129, 0.1); padding: 6px; border-radius: 10px; width: 100%; box-sizing: border-box; border: 1px dashed #10b981; display: flex; flex-direction: column; gap: 4px; align-items: center; }
 
         .quest-box { display: flex; flex-direction: column; gap: 6px; }
-        .quest-card { background: rgba(255,255,255,0.05); padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); font-size: 11px; }
-        .quest-card.ready-to-claim { border-color: #2ecc71; background: rgba(46, 204, 113, 0.1); }
-        .claim-btn { background: #2ecc71; color: white; padding: 4px 8px; font-size: 11px; border-radius: 6px; margin-top: 4px; width: auto; display: inline-block; cursor: pointer; }
+        .quest-card { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); font-size: 12px; transition: all 0.2s; }
+        .quest-card.ready-to-claim { border-color: #10b981; background: rgba(16, 185, 129, 0.12); }
+        .claim-btn { background: #10b981; color: white; border: none; padding: 6px 12px; font-size: 11px; font-weight: bold; border-radius: 6px; margin-top: 6px; cursor: pointer; transition: transform 0.1s; }
+        .claim-btn:active { transform: scale(0.95); }
         
-        .progress-bar { background: #34495e; border-radius: 6px; overflow: hidden; height: 14px; margin: 4px 0; position: relative; }
-        .progress-fill { background: #2ecc71; height: 100%; width: 0%; transition: width 0.3s; }
-        .progress-text { position: absolute; width: 100%; text-align: center; font-size: 10px; font-weight: bold; top: 0; left: 0; line-height: 14px; }
+        .progress-bar { background: #334155; border-radius: 8px; overflow: hidden; height: 16px; margin: 5px 0; position: relative; box-shadow: inset 0 2px 4px rgba(0,0,0,0.4); }
+        .progress-fill { background: #10b981; height: 100%; width: 0%; transition: width 0.3s ease; }
+        .progress-text { position: absolute; width: 100%; text-align: center; font-size: 11px; font-weight: bold; top: 0; left: 0; line-height: 16px; color: white; text-shadow: 1px 1px 2px black; }
         
-        .up-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 6px; }
-        .up-row span { font-size: 11px; }
-        .up-row button { width: auto; padding: 4px 8px; font-size: 11px; }
-        .trend { font-size: 10px; font-weight: bold; }
-        .trend-up { color: #2ecc71; } .trend-down { color: #e74c3c; }
+        .up-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.03); }
+        .up-row span { font-size: 12px; font-weight: 500; }
+        .up-row button { width: auto !important; padding: 6px 12px !important; font-size: 12px !important; border-radius: 8px !important; margin: 0 !important; }
+        .trend { font-size: 11px; font-weight: bold; padding: 2px 6px; border-radius: 4px; }
+        .trend-up { color: #10b981; background: rgba(16,185,129,0.1); } .trend-down { color: #ef4444; background: rgba(239,68,68,0.1); }
 
-        .crit-text { position: absolute; color: #f1c40f; font-weight: bold; font-size: 12px; animation: floatUp 1s forwards; background: rgba(0,0,0,0.8); padding: 3px 6px; border-radius: 6px; pointer-events: none; z-index: 10; text-align: center; }
-        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-40px); } }
+        .crit-text { position: absolute; color: #f59e0b; font-weight: bold; font-size: 14px; animation: floatUp 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards; background: rgba(15,23,42,0.9); border: 1px solid #f59e0b; padding: 4px 8px; border-radius: 8px; pointer-events: none; z-index: 10; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(0.8); } 20% { transform: translateY(-10px) scale(1.1); } 100% { opacity: 0; transform: translateY(-50px) scale(0.9); } }
         
-        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #2c3e50; border: 3px solid #f1c40f; padding: 20px; border-radius: 15px; z-index: 1000; width: 85%; max-width: 300px; box-shadow: 0 0 20px rgba(0,0,0,0.7); display: none; }
-        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); z-index: 999; display: none; }
-        .plot svg { width: 50%; height: auto; }
+        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1e293b; border: 3px solid #f59e0b; padding: 20px; border-radius: 20px; z-index: 1000; width: 85%; max-width: 320px; box-shadow: 0 0 30px rgba(0,0,0,0.8); display: none; color: white; }
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); z-index: 999; display: none; backdrop-filter: blur(4px); }
+        .plot svg { width: 45%; height: auto; transition: transform 0.3s; }
+        .plot:hover svg { transform: rotate(10deg) scale(1.1); }
     </style>
 </head>
 <body>
 
 <h1>🚜 IDLE FARM EMPIRE 🌾</h1>
+<div class="player-badge" id="player-rank-badge">👑 [Ур. 1] Начинающий фермер</div>
 
 <div class="stats-container">
     <div class="stat-box">💰 <span id="money">0.0000</span> $</div>
-    <div class="stat-box">🌟 Золотые: <span id="prestige-seeds" style="color:#f1c40f;">0</span></div>
+    <div class="stat-box">🌟 Золотые: <span id="prestige-seeds" style="color:#f59e0b;">0</span></div>
     <div class="stat-box">🌱 СЕМЕНА: <span id="seeds">30</span></div>
     <div class="clock-box">🕐 <span id="clock">00:00:00</span></div>
 </div>
@@ -108,9 +129,9 @@
 
 <div class="modal-overlay" id="offline-overlay"></div>
 <div class="modal" id="offline-modal">
-    <h3 style="color:#f1c40f; margin-top:0;">💤 С возвращением!</h3>
+    <h3 style="color:#f59e0b; margin-top:0;">💤 С возвращением!</h3>
     <p id="offline-report" style="font-size:13px; text-align:left; line-height:1.4;"></p>
-    <button onclick="closeOfflineModal()" style="background:#2ecc71; width:100%; padding:10px;">Забрать прибыль</button>
+    <button onclick="closeOfflineModal()" style="background:#10b981; width:100%; padding:12px; border-radius:10px; border:none; color:white; font-weight:bold;">Забрать прибыль</button>
 </div>
 
 <div class="main-layout">
@@ -123,97 +144,101 @@
                 <span id="pesticide-timer">🧴 Защита: Выкл</span>
                 <span id="dog-status">🐕 Пёс: Нет</span>
             </div>
-            <div id="manager-timer" style="color: #1abc9c; font-weight: bold; margin-top: 4px;">🤖 Менеджер склада: Выкл</div>
+            <div id="manager-timer" style="color: #2dd4bf; font-weight: bold; margin-top: 4px;">🤖 Менеджер склада: Выкл</div>
         </div>
 
         <div class="grid" id="farm-grid"></div>
         
         <div class="btn-box">
-            <button class="upgrade-btn" onclick="buyAutoTractor()">🛒 КУПИТЬ ТРАКТОР (<span id="tractor-cost">50</span> $)</button>
-            <div style="width:100%; display:flex; justify-content:space-between; font-size:11px; background:rgba(0,0,0,0.3); padding:6px; border-radius:6px; box-sizing:border-box;">
+            <button class="upgrade-btn" onclick="buyAutoTractor()">🛒 КУПИТЬ ТРАКТОР (<span id="tractor-cost">5.00</span> $)</button>
+            <div style="width:100%; display:flex; justify-content:space-between; font-size:11px; background:rgba(0,0,0,0.4); padding:8px; border-radius:8px; box-sizing:border-box; border: 1px solid #334155;">
                 <span>⛽ БАК ТРАКТОРА:</span>
                 <span id="fuel-display">100/100 л.</span>
             </div>
-            <button class="upgrade-btn" style="background:linear-gradient(#f1c40f,#f39c12); box-shadow:0 3px 0 #d35400;" onclick="refuelTractor()">⛽ ЗАПРАВИТЬ ($0.50)</button>
+            <button class="upgrade-btn" style="background:linear-gradient(135deg, #eab308, #ca8a04); border-color:#a16207;" onclick="refuelTractor()">⛽ ЗАПРАВИТЬ БАК ($0.50)</button>
             <button id="ad-button" class="ad-btn" onclick="watchAdWithAntiCheat()">📺 СМОТРЕТЬ РЕКЛАМУ (+2.0$)</button>
         </div>
-        <div id="tractor-status" style="font-size:12px; margin-top:5px; font-weight:bold;">Тракторов: 0</div>
+        <div id="tractor-status" style="font-size:12px; margin-top:6px; font-weight:bold; color: #94a3b8;">Количество тракторов: 0</div>
     </div>
 
     <div class="panel" id="content-market" style="display:none;">
-        <div class="panel-title" style="color: #1abc9c;">🤖 МЕНЕДЖЕР АВТО-СКЛАДА (НА 4 ЧАСА)</div>
-        <div style="font-size:11px; margin-bottom:6px; line-height:1.4;">
-            Автоматически загружает Завод и продает товары по лучшему курсу.<br>
-            Доступно купонов: <b style="color:#1abc9c;" id="coupon-count">0</b> шт.
-        </div>
-        <div style="display:flex; gap:5px; margin-bottom:10px;">
+        <div class="panel-title" style="color: #2dd4bf;">🤖 АВТО-МЕНЕДЖЕР СКЛАДА</div>
+        <div class="info-hint">❓ Зачем нужен: Работает 4 часа. Сам загружает Завод сырьем и продает излишки, защищая склад от переполнения, пока ты офлайн!</div>
+        <div style="font-size:11px; margin-bottom:6px; color:#94a3b8;">Доступно купонов: <b style="color:#2dd4bf;" id="coupon-count">0</b> шт.</div>
+        <div style="display:flex; gap:6px; margin-bottom:12px;">
             <button class="auto-btn" style="flex:1;" onclick="activateManager('coupon')">🎫 Сдать купон</button>
-            <button class="auto-btn" style="flex:1; background:linear-gradient(#34495e, #2c3e50); box-shadow:0 4px 0 #1a252f;" onclick="activateManager('money')">💰 Нанять ($5.0)</button>
+            <button class="auto-btn" style="flex:1; background:linear-gradient(135deg, #475569, #334155); border-color:#1e293b;" onclick="activateManager('money')">💰 Нанять ($5.0)</button>
         </div>
 
         <div class="panel-title">🏪 БИРЖА УРОЖАЯ <span id="market-trend" class="trend"></span></div>
-        <div style="font-size:11px; margin-bottom:6px; line-height: 1.4;">
-            🥕 Морковь: <b id="price-c">0.0005</b>$ <span style="color:#f1c40f;" id="p-bonus-c"></span><br>
-            🍅 Помидор: <b id="price-t">0.002</b>$ <span style="color:#f1c40f;" id="p-bonus-t"></span><br>
-            🍉 Арбуз: <b id="price-w">0.010</b>$ <span style="color:#f1c40f;" id="p-bonus-w"></span><br>
-            🥫 КОНСЕРВЫ: <b id="price-p">0.050</b>$
+        <div class="info-hint">❓ Зачем нужна: Здесь отображаются текущие цены. Цены умножаются на уровень селекции культуры и бонус погоды!</div>
+        <div style="font-size:12px; margin-bottom:8px; line-height: 1.5; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px;">
+            🥕 Морковь: <b id="price-c">0.0005</b>$ <span style="color:#f59e0b;" id="p-bonus-c"></span><br>
+            🍅 Помидор: <b id="price-t">0.0020</b>$ <span style="color:#f59e0b;" id="p-bonus-t"></span><br>
+            🍉 Арбуз: <b id="price-w">0.0100</b>$ <span style="color:#f59e0b;" id="p-bonus-w"></span><br>
+            🥫 КОНСЕРВЫ (Завод): <b id="price-p">0.0500</b>$
         </div>
-        <button class="market-btn" style="margin-bottom:6px;" onclick="sellAll('raw')">ПРОДАТЬ ВСЁ СЫРЬЕ</button>
-        <button class="market-btn" style="background:linear-gradient(#9b59b6, #8e44ad); box-shadow:0 3px 0 #6d3284;" onclick="sellAll('processed')">ПРОДАТЬ ПРОДУКЦИЮ ЗАВОДА</button>
+        <button class="market-btn" style="margin-bottom:6px;" onclick="sellAll('raw')">🧺 ПРОДАТЬ ВСЁ СЫРЬЕ</button>
+        <button class="market-btn" style="background:linear-gradient(135deg, #a855f7, #8b5cf6); border-color:#6d28d9;" onclick="sellAll('processed')">🥫 ПРОДАТЬ КОНСЕРВЫ ЗАВОДА</button>
         
-        <div style="margin-top:8px; padding:6px; background:rgba(231,76,60,0.15); border-radius:8px; text-align:center; display:flex; justify-content:space-between; align-items:center;">
-            <span>🌱 10 СЕМЯН = <b style="color:#e74c3c;">0.10$</b></span>
-            <button class="market-btn" style="width:auto; padding:4px 10px; font-size:11px; margin:0;" onclick="buySeeds()">КУПИТЬ</button>
+        <div style="margin-top:10px; padding:8px; background:rgba(239,68,68,0.1); border-radius:10px; text-align:center; display:flex; justify-content:space-between; align-items:center; border: 1px solid rgba(239,68,68,0.2);">
+            <span style="font-size:11px;">🌱 Покупка: 10 СЕМЯН = <b style="color:#f87171;">0.10$</b></span>
+            <button class="market-btn" style="width:auto; padding:5px 12px; font-size:11px; margin:0;" onclick="buySeeds()">КУПИТЬ</button>
         </div>
 
-        <div class="panel-title" style="margin-top:10px;">📦 СКЛАД СЫРЬЯ</div>
+        <div class="panel-title" style="margin-top:12px;">📦 Вместимость склада</div>
+        <div class="info-hint">❓ Зачем нужен: Ограничивает максимум сырья. Если склад забит 50/50, автоматический сбор урожая тракторами остановится!</div>
         <div class="progress-bar"><div class="progress-fill" id="stock-bar"></div><div class="progress-text" id="stock-text">0/50</div></div>
-        <div style="display:flex; justify-content:space-between; margin-top:4px; font-size:11px;">
+        <div style="display:flex; justify-content:space-between; margin-top:4px; font-size:11px; color:#cbd5e1;">
             <span>🥕 Морковь: <b id="inv-carrot">0</b></span>
             <span>🍅 Помидоры: <b id="inv-tomato">0</b></span>
             <span>🍉 Арбузы: <b id="inv-watermelon">0</b></span>
         </div>
 
-        <div class="panel-title" style="margin-top:10px;">🏭 ПЕРЕРАБОТКА (ЗАВОД)</div>
-        <div class="progress-bar"><div class="progress-fill" id="factory-bar" style="background:#9b59b6;"></div><div class="progress-text" id="factory-text">Свободен</div></div>
-        <div style="margin-bottom:6px; font-size:11px;">🥫 Готовая продукция: <span id="inv-processed">0</span> шт</div>
-        <button class="factory-btn" onclick="startProcessing()">ЗАПУСТИТЬ ЗАВОД (10 шт)</button>
+        <div class="panel-title" style="margin-top:12px;">🏭 ПЕРЕРАБОТКА (ЗАВОД)</div>
+        <div class="info-hint">❓ Зачем нужен: Перерабатывает любые 10 единиц овощей в дорогие консервы 🥫, увеличивая ценность сырья в разы!</div>
+        <div class="progress-bar"><div class="progress-fill" id="factory-bar" style="background:#a855f7;"></div><div class="progress-text" id="factory-text">Свободен</div></div>
+        <div style="margin-bottom:6px; font-size:11px; color:#cbd5e1;">🥫 Готовая продукция на продажу: <span id="inv-processed">0</span> шт</div>
+        <button class="factory-btn" onclick="startProcessing()">⚙️ ЗАПУСТИТЬ ЗАВОД (Расход: 10 овощей)</button>
 
-        <div class="panel-title" style="margin-top:12px;">🛡️ ЗАЩИТА ОТ ЖУКОВ</div>
+        <div class="panel-title" style="margin-top:14px;">🛡️ БОРЬБА С ВРЕДИТЕЛЯМИ</div>
+        <div class="info-hint">❓ Зачем нужна: Жуки блокируют грядки. Пестициды дают иммунитет на 1 час, а Пёс ловит жуков автоматически 20 раз подряд!</div>
         <div class="up-row" style="flex-direction: column; align-items: stretch; gap: 4px;">
             <div style="display: flex; justify-content: space-between;">
-                <span>🧴 Пестициды (1 ч.)</span>
-                <span id="pest-use-count" style="color: #f1c40f; font-weight: bold;">0/5</span>
+                <span>🧴 Пестициды (Защита 1 ч.)</span>
+                <span id="pest-use-count" style="color: #f59e0b; font-weight: bold;">Цена: 0$</span>
             </div>
-            <button id="pest-buy-btn" class="pest-btn" onclick="buyPesticides()">Купить (Бесплатно)</button>
+            <button id="pest-buy-btn" class="pest-btn" onclick="buyPesticides()">Купить защиту</button>
         </div>
         <div class="up-row">
-            <span>🐕 Пёс-Охотник</span>
-            <button id="dog-buy-btn" class="dog-btn" onclick="buyDog()">Купить ($15.0)</button>
+            <span>🐕 Пёс-Охотник (20 зарядов)</span>
+            <button id="dog-buy-btn" class="dog-btn" onclick="buyDog()">Нанять ($15.0)</button>
         </div>
     </div>
 
     <div class="panel" id="content-achieve" style="display:none;">
-        <div class="panel-title" style="color:#f1c40f; border-color:#f1c40f;">🏆 ТУРНИРНЫЙ СЕЗОН РЕЙТИНГА</div>
+        <div class="panel-title" style="color:#f59e0b; border-color:#f59e0b;">🏆 РЕЙТИНГ И СЕЗОНЫ</div>
+        <div class="info-hint">❓ Как это устроено: Дневной ТОП обнуляется каждую ночь в 00:00. Недельный — в воскресенье в 00:00. Боты теперь развиваются честно!</div>
         <div style="font-size:11px; background:rgba(0,0,0,0.2); padding:8px; border-radius:8px; margin-bottom:8px; line-height:1.4;">
-            До конца сезона: <b style="color:#e74c3c;" id="season-timer">00:00</b><br>
-            🎁 <b>Призы:</b> 1 место — 5🌟 + 2🎫 + 3🧴; 2-3 место — 1🎫 + 50🌱; 4-10 место — 1🎫.
+            ⏱️ Сброс Дневного топа: <b style="color:#f87171;" id="day-timer">00:00:00</b><br>
+            ⏱️ Конец Недельного сезона: <b style="color:#f87171;" id="week-timer">0 дней 00:00</b>
         </div>
-        <div id="leaderboard" style="margin-bottom:15px;"></div>
+        <div id="leaderboard" style="margin-bottom:15px; display:flex; flex-direction:column; gap:2px;"></div>
 
-        <div class="panel-title" style="color:#e74c3c; border-color:#e74c3c;">⭐ КОРПОРАЦИЯ (ПРЕСТИЖ)</div>
-        <div style="font-size:11px; margin-bottom:6px; line-height:1.4;">
-            Вы можете продать империю за Золотые Семена. Каждый уровень бонуса дает <b style="color:#f1c40f;">+25% доходности навсегда</b>.<br>
-            Текущий бонус: <b style="color:#2ecc71;">+<span id="prestige-bonus-pct">0</span>%</b> дохода.
+        <div class="panel-title" style="color:#ef4444; border-color:#ef4444;">⭐ КОРПОРАЦИЯ (ПРЕСТИЖ)</div>
+        <div class="info-hint">❓ Зачем нужен: Полный сброс фермы в обмен на Золотые Семена. Каждое семя дает +25% к цене всей продукции НАВСЕГДА.</div>
+        <div style="font-size:11px; margin-bottom:6px; color:#cbd5e1;">
+            Текущий бонус престижа: <b style="color:#10b981;">+<span id="prestige-bonus-pct">0</span>%</b> дохода.
         </div>
-        <button class="prestige-btn" style="margin-bottom:10px;" onclick="triggerPrestige()">ПРОДАТЬ СЕЙЧАС (Получите: <span id="prestige-gain">0</span> 🌟)</button>
+        <button class="prestige-btn" style="margin-bottom:12px;" onclick="triggerPrestige()">🧬 ПРОДАТЬ ФЕРМУ (Получить: <span id="prestige-gain">0</span> 🌟)</button>
 
-        <div class="panel-title">🛠️ АПГРЕЙДЫ ФЕРМЫ</div>
-        <div class="up-row"><span>📦 Склад (+25)</span><button class="upgrade-btn" onclick="upgrade('stock')"><span id="cost-u-stock">1.0</span>$</button></div>
-        <div class="up-row"><span>⚡ Завод (+20%)</span><button class="upgrade-btn" onclick="upgrade('factory')"><span id="cost-u-fact">2.0</span>$</button></div>
-        <div class="up-row"><span>⛽ Бак (+50л)</span><button class="upgrade-btn" onclick="upgrade('fuel')"><span id="cost-u-fuel">1.5</span>$</button></div>
+        <div class="panel-title">🛠️ МОДЕРНИЗАЦИЯ ТЕХНИКИ</div>
+        <div class="up-row"><span>📦 Расширение Склада (+25 мест)</span><button class="upgrade-btn" onclick="upgrade('stock')"><span id="cost-u-stock">1.0</span>$</button></div>
+        <div class="up-row"><span>⚡ Ускорение Завода (+20% к пачке)</span><button class="upgrade-btn" onclick="upgrade('factory')"><span id="cost-u-fact">2.0</span>$</button></div>
+        <div class="up-row"><span>⛽ Емкость бензобака (+50л)</span><button class="upgrade-btn" onclick="upgrade('fuel')"><span id="cost-u-fuel">1.5</span>$</button></div>
         
         <div class="panel-title" style="margin-top:12px;">🧬 СЕЛЕКЦИЯ КУЛЬТУР</div>
+        <div class="info-hint">❓ Зачем нужна: Навсегда увеличивает базовую стоимость продажи конкретного овоща на +15% за уровень.</div>
         <div class="up-row"><span>🥕 Морковь (Лвл <span id="lvl-c">1</span>)</span><button class="upgrade-btn" onclick="upgradeCrop(1)"><span id="cost-c-c">0.5</span>$</button></div>
         <div class="up-row"><span>🍅 Помидор (Лвл <span id="lvl-t">1</span>)</span><button class="upgrade-btn" onclick="upgradeCrop(2)"><span id="cost-c-t">2.0</span>$</button></div>
         <div class="up-row"><span>🍉 Арбуз (Лвл <span id="lvl-w">1</span>)</span><button class="upgrade-btn" onclick="upgradeCrop(3)"><span id="cost-c-w">5.0</span>$</button></div>
@@ -226,7 +251,7 @@
 <script>
     const FREE_PLOTS = 3;
     const PLOT_UNLOCK_COSTS = [0, 0, 0, 1.0, 5.0, 20.0, 50.0, 150.0, 500.0];
-    const TRACTOR_BASE_COST = 5;
+    const TRACTOR_BASE_COST = 5.0;
     const AD_REWARD = 2.0;
     
     const BASE_REWARDS = { 1: 0.0005, 2: 0.0020, 3: 0.0100 };
@@ -239,9 +264,8 @@
         { name: "Обычная 🌤️", income: 1.0, speed: 1.0 }
     ];
 
-    const PEST_PRICES = [0, 10.0, 50.0, 150.0, 500.0];
+    const PEST_PRICES = [0, 1.0, 3.0, 8.0, 20.0];
 
-    // БАНК РАЗНЫХ И КРАСИВЫХ ИМЕН ДЛЯ БОТОВ
     const BOT_NAMES = [
         "Agro_Gamer", "Король_Морковки", "Тракторист_99", "Сонный_Фермер", "КиберПахарь", 
         "Морковный_Рыцарь", "Томатный_Магнат", "Злой_Жук", "Грядка_PRO", "Василий_Агро", 
@@ -249,7 +273,6 @@
         "Веселый_Трактор", "Агроном_2026", "Сельская_Жизнь", "Комбайнер_Макс", "ЭкоФерма"
     ];
 
-    // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
     let playerName = localStorage.getItem('mx_player_name') || "";
     let money = parseFloat(localStorage.getItem('mx_money')) || 0;
     let seeds = localStorage.getItem('mx_seeds') !== null ? parseInt(localStorage.getItem('mx_seeds')) : 30;
@@ -263,7 +286,6 @@
     let managerUntil = parseInt(localStorage.getItem('mx_manager_until')) || 0;
     let managerLastResetDay = localStorage.getItem('mx_manager_reset_day') || "";
     let autoCoupons = parseInt(localStorage.getItem('mx_auto_coupons')) || 0;
-    let seasonEndTime = parseInt(localStorage.getItem('mx_season_end')) || (Date.now() + 300000); 
 
     let stock = { 1: parseInt(localStorage.getItem('mx_s1'))||0, 2: parseInt(localStorage.getItem('mx_s2'))||0, 3: parseInt(localStorage.getItem('mx_s3'))||0 };
     let processedStock = parseInt(localStorage.getItem('mx_sp')) || 0;
@@ -285,22 +307,22 @@
     let lastTrend = 'up';
     let factoryProgress = 0;
     let isFactoryRunning = false;
+    let level = 1;
+    let levelTitle = "Начинающий";
 
-    // ГЕНЕРАЦИЯ БОТОВ С ЧЕСТНЫМ БАЛАНСОМ И СЛУЧАЙНЫМИ НИКАМИ
-    let bots = JSON.parse(localStorage.getItem('mx_generated_bots_v2'));
+    // Инициализация ботов
+    let bots = JSON.parse(localStorage.getItem('mx_generated_bots_v3'));
     if (!bots) {
         bots = [];
         for(let i=1; i<=99; i++) {
             let baseNick = BOT_NAMES[Math.floor(Math.random() * BOT_NAMES.length)];
-            let uniqueNick = baseNick + "_" + Math.floor(Math.random() * 90 + 10);
-            
             bots.push({ 
-                name: uniqueNick, 
-                money: 0.0000, // В начале сезона у всех 0 денег
-                baseIncome: parseFloat((0.00005 + Math.random() * 0.0001).toFixed(6)) // Низший доход, чтобы игрок мог легко обогнать
+                name: baseNick + "_" + Math.floor(Math.random() * 90 + 10), 
+                money: 0.0, 
+                baseIncome: parseFloat((0.00003 + Math.random() * 0.00007).toFixed(6))
             });
         }
-        localStorage.setItem('mx_generated_bots_v2', JSON.stringify(bots));
+        localStorage.setItem('mx_generated_bots_v3', JSON.stringify(bots));
     }
 
     const plots = Array(9).fill(null).map(() => ({ status: 'empty', startTime: 0, duration: 0, icon: '', type: 1 }));
@@ -313,24 +335,44 @@
     
     function getCropPrice(type) { return marketPrices[type] * (1 + (cropLevels[type] - 1) * 0.15) * currentWeather.income * getPrestigeMultiplier(); }
     function getProcessedPrice() { return marketPrices.processed * currentWeather.income * getPrestigeMultiplier(); }
-    function getUpgradeCost(type, lvl) { return type==='stock'? 1.0*Math.pow(1.8, lvl) : type==='factory'? 2.0*Math.pow(2.0, lvl) : 1.5*Math.pow(1.6, lvl); }
-    function getCropUpgradeCost(type) { return type===1? 0.5*Math.pow(1.9, cropLevels[1]-1) : type===2? 2.0*Math.pow(2.1, cropLevels[2]-1) : 5.0*Math.pow(2.5, cropLevels[3]-1); }
+    
+    function getUpgradeCost(type) { 
+        let lvl = type === 'stock' ? upStockLvl : type === 'factory' ? upFactLvl : upFuelLvl;
+        let base = type === 'stock' ? 1.0 : type === 'factory' ? 2.0 : 1.5;
+        let factor = type === 'stock' ? 1.8 : type === 'factory' ? 2.0 : 1.6;
+        return base * Math.pow(factor, lvl); 
+    }
+    
+    function getCropUpgradeCost(type) { 
+        let clvl = cropLevels[type];
+        return type===1 ? 0.5*Math.pow(1.9, clvl-1) : type===2 ? 2.0*Math.pow(2.1, clvl-1) : 5.0*Math.pow(2.5, clvl-1); 
+    }
+    
     function getSoilUpgradeCost(lvl) { return 0.2 * Math.pow(1.7, lvl - 1); }
 
     function fmt(v) { return (parseFloat(v) || 0).toFixed(4); }
-    function formatTimeLeft(ms) {
-        const s = Math.ceil(ms / 1000);
-        return s <= 0 ? '0s' : s < 60 ? s + 's' : Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+    
+    function formatClockTime(ms) {
+        let totalSec = Math.floor(ms / 1000);
+        let h = String(Math.floor(totalSec / 3600)).padStart(2, '0');
+        let m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
+        let s = String(totalSec % 60).padStart(2, '0');
+        return `${h}:${m}:${s}`;
     }
 
-    let level = 1;
-    function recalculateLevel() { level = money >= 100 ? 5 : money >= 15 ? 3 : 1; }
+    function recalculateLevel() { 
+        if (maxScore >= 150.0) { level = 5; levelTitle = "Агро-Император 👑"; }
+        else if (maxScore >= 40.0) { level = 4; levelTitle = "Магнат Арбузов 🍉"; }
+        else if (maxScore >= 10.0) { level = 3; levelTitle = "Помидорный Барон 🍅"; }
+        else if (maxScore >= 1.5)  { level = 2; levelTitle = "Опытный Морковщик 🥕"; }
+        else { level = 1; levelTitle = "Начинающий фермер 🌱"; }
+    }
 
     function getCropData(plotIndex) {
         let soilLvl = soilLevels[plotIndex] || 1;
         let speedBonus = 1 - (Math.min(14, soilLvl - 1) * 0.05);
         recalculateLevel();
-        if (level >= 5) return { type: 3, icon: '🍉', time: BASE_TIMES[3] * currentWeather.speed * speedBonus };
+        if (level >= 4) return { type: 3, icon: '🍉', time: BASE_TIMES[3] * currentWeather.speed * speedBonus };
         if (level >= 3) return { type: 2, icon: '🍅', time: BASE_TIMES[2] * currentWeather.speed * speedBonus };
         return                 { type: 1, icon: '🥕', time: BASE_TIMES[1] * currentWeather.speed * speedBonus };
     }
@@ -346,7 +388,7 @@
 
     function checkPlayerRegistration() {
         if (!playerName || playerName.trim() === "") {
-            let nick = prompt("👋 Добро пожаловать на турнирную арену!\nВведите ваш никнейм для таблицы лидеров:");
+            let nick = prompt("👋 Добро пожаловать!\nВведите ваш никнейм для таблицы лидеров:");
             if (!nick || nick.trim() === "") nick = "Игрок_" + Math.floor(Math.random()*1000);
             playerName = nick.substring(0, 14);
             localStorage.setItem('mx_player_name', playerName);
@@ -355,20 +397,20 @@
 
     function activateManager(type) {
         let todayStr = new Date().toDateString();
-        if (managerLastResetDay === todayStr && managerUntil > Date.now()) return alert("🤖 Менеджер уже работает на вашей ферме!");
+        if (managerLastResetDay === todayStr && managerUntil > Date.now()) return alert("🤖 Менеджер уже трудится на ферме!");
         
         if (type === 'coupon') {
-            if (autoCoupons <= 0) return alert("❌ У вас нет купонов! Выиграйте их, заняв места в ТОП-10 рейтинга.");
+            if (autoCoupons <= 0) return alert("❌ Нет доступных купонов!");
             autoCoupons--;
         } else {
-            if (money < 5.0) return alert("❌ Недостаточно денег ($5.0) для найма менеджера.");
+            if (money < 5.0) return alert("❌ Недостаточно средств ($5.0)!");
             money -= 5.0;
         }
         
         managerUntil = Date.now() + 14400000; 
         managerLastResetDay = todayStr;
         save(); updateUI();
-        alert("🤖 Менеджер склада успешно нанят на 4 часа!");
+        alert("🤖 Менеджер склада нанят на 4 часа!");
     }
 
     function runManagerLogic() {
@@ -383,49 +425,82 @@
         }
     }
 
-    function checkSeasonEnd() {
-        if (Date.now() >= seasonEndTime) {
+    // РАБОТА С СЕЗОНАМИ И СБРОСАМИ В ПОЛНОЧЬ
+    function checkCronTimers() {
+        let now = new Date();
+        let timestamp = now.getTime();
+        
+        let lastDayReset = parseInt(localStorage.getItem('mx_last_day_reset')) || 0;
+        let lastWeekReset = parseInt(localStorage.getItem('mx_last_week_reset')) || 0;
+        
+        // Определение начала текущего дня в мс
+        let startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        
+        // Определение начала текущей недели (Понедельник)
+        let dayOfWeek = now.getDay(); 
+        let diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+        let startOfThisWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday).getTime();
+
+        // 1. ЕЖЕДНЕВНЫЙ СБРОС (В 00:00)
+        if (lastDayReset < startOfToday && lastDayReset !== 0) {
+            alert("🏁 Дневной рейтинг завершен! Боты обновили свои результаты за день.");
+            bots.forEach(b => { b.money = 0; });
+            localStorage.setItem('mx_generated_bots_v3', JSON.stringify(bots));
+            localStorage.setItem('mx_last_day_reset', timestamp);
+            save();
+        } else if (lastDayReset === 0) {
+            localStorage.setItem('mx_last_day_reset', timestamp);
+        }
+
+        // 2. ЕЖЕНЕДЕЛЬНЫЙ СБРОС (Воскресенье после 12 ночи, то есть Понедельник 00:00)
+        if (lastWeekReset < startOfThisWeek && lastWeekReset !== 0) {
             const all = bots.concat([{ name: playerName, money: maxScore, isPlayer: true }]).sort((a,b) => b.money - a.money);
             let playerRank = all.findIndex(p => p.isPlayer) + 1;
             
-            let prizeMsg = `🏁 Сезон завершен! Ваш результат: ${playerRank} место в рейтинге.\n\n`;
-            
+            let prizeMsg = `🏆 НЕДЕЛЬНЫЙ СЕЗОН ОКОНЧЕН!\nВаше итоговое место: ${playerRank}\n\n`;
             if (playerRank === 1) {
-                prestigeSeeds += 5; autoCoupons += 2; pesticideUntil = Date.now() + 10800000;
-                prizeMsg += "🎁 НАГРАДА ТОП-1:\n+5 Золотых семян 🌟\n+2 Купона Менеджера 🎫\n+3 часа Пестицидов 🧴";
+                prestigeSeeds += 5; autoCoupons += 2;
+                prizeMsg += "Награда ТОП-1: +5 🌟 и +2 🎫 Купона!";
             } else if (playerRank <= 3) {
                 autoCoupons += 1; seeds += 50;
-                prizeMsg += "🎁 НАГРАДА ТОП-3:\n+1 Купон Менеджера 🎫\n+50 Обычных семян 🌱";
-            } else if (playerRank <= 10) {
-                autoCoupons += 1;
-                prizeMsg += "🎁 НАГРАДА ТОП-10:\n+1 Купон Менеджера 🎫";
+                prizeMsg += "Награда ТОП-3: +1 🎫 и +50 🌱 семян!";
             } else {
-                seeds += 10;
-                prizeMsg += "🎁 Утешительный приз: +10 семян 🌱 за участие!";
+                seeds += 15;
+                prizeMsg += "Награда: +15 🌱 семян за участие!";
             }
-            
             alert(prizeMsg);
             
-            seasonEndTime = Date.now() + 300000; 
-            
-            // Сброс денег у ботов к нулю перед новым сезоном
+            // Сброс недельных параметров
+            maxScore = money; 
             bots.forEach(b => { 
                 b.money = 0; 
-                let baseNick = BOT_NAMES[Math.floor(Math.random() * BOT_NAMES.length)];
-                b.name = baseNick + "_" + Math.floor(Math.random() * 90 + 10);
+                b.baseIncome = parseFloat((0.00003 + Math.random() * 0.00007).toFixed(6));
             });
-            localStorage.setItem('mx_generated_bots_v2', JSON.stringify(bots));
-            
-            save(); updateUI();
+            localStorage.setItem('mx_generated_bots_v3', JSON.stringify(bots));
+            localStorage.setItem('mx_last_week_reset', timestamp);
+            save();
+        } else if (lastWeekReset === 0) {
+            localStorage.setItem('mx_last_week_reset', timestamp);
         }
+
+        // Рендеринг таймеров обратного отсчета
+        let tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime();
+        let msToTomorrow = tomorrow - timestamp;
+        document.getElementById('day-timer').innerText = formatClockTime(msToTomorrow);
+
+        let nextMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + (dayOfWeek === 0 ? 1 : 8 - dayOfWeek)).getTime();
+        let msToMonday = nextMonday - timestamp;
+        let daysLeft = Math.floor(msToMonday / 86400000);
+        let remMs = msToMonday % 86400000;
+        document.getElementById('week-timer').innerText = `${daysLeft}д. ${formatClockTime(remMs)}`;
     }
 
     function calculatePrestigeGain() { return money < 50 ? 0 : Math.floor(Math.sqrt(money / 50)); }
 
     function triggerPrestige() {
         let gain = calculatePrestigeGain();
-        if (gain <= 0) return alert('❌ Вам нужно накопить хотя бы $50.0.');
-        if (confirm(`Продать ферму корпорации за ${gain} Золотых Семян 🌟?`)) {
+        if (gain <= 0) return alert('❌ Вам необходимо накопить минимум $50.0 для проведения Престижа.');
+        if (confirm(`Вы уверены, что хотите продать ферму корпорации в обмен на ${gain} Золотых Семян 🌟?`)) {
             prestigeSeeds += gain;
             money = 0; seeds = 30; tractorsCount = 0; tractorCost = TRACTOR_BASE_COST; maxScore = 0;
             unlockedPlots = [true,true,true,false,false,false,false,false,false];
@@ -438,26 +513,28 @@
 
     function upgradeSoil(i) {
         let currentLvl = soilLevels[i] || 1; let cost = getSoilUpgradeCost(currentLvl);
-        if (money < cost) return alert('Мало денег!');
+        if (money < cost) return alert('❌ Недостаточно средств!');
         money -= cost; soilLevels[i]++; save(); updateUI();
     }
-
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.plot') && e.target.closest('.plot').classList.contains('ready')) {
-            // Сбор кликом
-        }
-    });
 
     function getSoilName(lvl) { return lvl >= 15 ? "Гидропоника" : lvl >= 10 ? "Теплица" : lvl >= 5 ? "Чернозем" : "Земля"; }
 
     function generateRandomQuest(slotIndex) {
-        const questTypes = [{ id: 'harvest', text: 'Собрать урожай', baseTarget: 15, rewMoney: 0.15, rewSeeds: 8 }, { id: 'bugs', text: 'Раздавить жуков 🐛', baseTarget: 2, rewMoney: 0.25, rewSeeds: 10 }];
+        const questTypes = [
+            { id: 'harvest', text: 'Собрать урожай с грядок', baseTarget: 15, rewMoney: 0.15, rewSeeds: 8 }, 
+            { id: 'bugs', text: 'Раздавить вредителей 🐛', baseTarget: 3, rewMoney: 0.30, rewSeeds: 12 }
+        ];
         let type = questTypes[Math.floor(Math.random() * questTypes.length)];
         activeQuests[slotIndex] = { type: type.id, text: type.text, current: 0, target: type.baseTarget, rewMoney: type.rewMoney, rewSeeds: type.rewSeeds, claimed: false };
     }
 
     function initQuestsSystem() { if (activeQuests.length === 0) { for (let i = 0; i < 3; i++) { generateRandomQuest(i); } save(); } }
-    function progressQuest(type, amount) { activeQuests.forEach((q) => { if (!q.claimed && q.type === type) { q.current = Math.min(q.target, q.current + amount); } }); save(); }
+    
+    function progressQuest(type, amount) { 
+        activeQuests.forEach((q) => { if (!q.claimed && q.type === type) { q.current = Math.min(q.target, q.current + amount); } }); 
+        save(); 
+    }
+    
     function claimQuestReward(index) {
         let q = activeQuests[index];
         if (q.current >= q.target && !q.claimed) {
@@ -467,13 +544,15 @@
     }
 
     function buyPesticides() {
-        let todayStr = new Date().toDateString(); if (pesticideLastDate !== todayStr) { pesticideDailyUses = 0; pesticideLastDate = todayStr; }
-        if (pesticideUntil > Date.now()) return alert('🧴 Уже активны!');
-        if (money < PEST_PRICES[pesticideDailyUses]) return alert(`Мало денег!`);
-        money -= PEST_PRICES[pesticideDailyUses]; pesticideUntil = Date.now() + 3600000; pesticideDailyUses++; save(); updateUI();
+        let todayStr = new Date().toDateString(); 
+        if (pesticideLastDate !== todayStr) { pesticideDailyUses = 0; pesticideLastDate = todayStr; }
+        if (pesticideUntil > Date.now()) return alert('🧴 Защита пестицидов уже активна!');
+        let price = PEST_PRICES[Math.min(pesticideDailyUses, PEST_PRICES.length - 1)];
+        if (money < price) return alert(`❌ Недостаточно денег! Нужно ${price}$`);
+        money -= price; pesticideUntil = Date.now() + 3600000; pesticideDailyUses++; save(); updateUI();
     }
 
-    function buyDog() { if (money < 15.00) return alert('Собака стоит $15.00!'); money -= 15.00; dogCharges += 20; save(); updateUI(); }
+    function buyDog() { if (money < 15.00) return alert('❌ Пёс стоит $15.00!'); money -= 15.00; dogCharges += 20; save(); updateUI(); }
 
     function renderGrid() {
         if (!gridElement) return; gridElement.innerHTML = '';
@@ -483,25 +562,35 @@
             let soilLvl = soilLevels[i] || 1;
 
             if (!unlockedPlots[i]) {
-                div.className += ' locked'; div.innerHTML = `🔒<div class="plot-label">${PLOT_UNLOCK_COSTS[i]}$</div>`;
+                div.className += ' locked'; div.innerHTML = `🔒<div class="plot-label">Купить: ${PLOT_UNLOCK_COSTS[i]}$</div>`;
                 div.onclick = function() { if(money>=PLOT_UNLOCK_COSTS[i]) { money-=PLOT_UNLOCK_COSTS[i]; unlockedPlots[i]=true; save(); updateUI(); } };
                 container.appendChild(div);
             } else {
                 const upBtn = document.createElement('button'); upBtn.className = 'soil-upgrade-btn';
-                upBtn.innerText = `[${getSoilName(soilLvl)} Lv ${soilLvl}] +${getSoilUpgradeCost(soilLvl).toFixed(2)}$`;
+                upBtn.innerText = `[${getSoilName(soilLvl)}] Ур.${soilLvl} 🔺 ${getSoilUpgradeCost(soilLvl).toFixed(2)}$`;
                 upBtn.onclick = function(e) { e.stopPropagation(); upgradeSoil(i); };
                 container.appendChild(upBtn);
 
                 if (plot.status === 'bugged') {
-                    div.className += ' bugged'; div.innerHTML = `🐛<div class="plot-label">ТАП!</div>`;
-                    div.onclick = function() { plots[i].status = 'growing'; plots[i].startTime = Date.now(); save(); updateUI(); };
+                    div.className += ' bugged'; div.innerHTML = `🐛<div class="plot-label">ЖУК! ТАП</div>`;
+                    div.onclick = function() { 
+                        plots[i].status = 'growing'; plots[i].startTime = Date.now(); 
+                        progressQuest('bugs', 1); save(); updateUI(); 
+                    };
                 } else if (plot.status === 'empty') {
-                    div.innerHTML = `<svg viewBox="0 0 44 38"><path d="M2 31 Q9 16 22 14 Q35 16 42 31 Z" fill="#8B4513"/></svg><div class="plot-label">ПОСАДИТЬ</div>`;
-                    div.onclick = function() { if(i<FREE_PLOTS || seeds>0) { if(i>=FREE_PLOTS) seeds--; const c=getCropData(i); plots[i]={status:'growing',icon:c.icon,type:c.type,duration:c.time,startTime:Date.now()}; save(); updateUI(); } };
+                    div.innerHTML = `<svg viewBox="0 0 44 38"><path d="M2 31 Q9 16 22 14 Q35 16 42 31 Z" fill="#653b1b"/></svg><div class="plot-label">ПОСАДИТЬ</div>`;
+                    div.onclick = function() { 
+                        if(i<FREE_PLOTS || seeds>0) { 
+                            if(i>=FREE_PLOTS) seeds--; 
+                            const c=getCropData(i); 
+                            plots[i]={status:'growing',icon:c.icon,type:c.type,duration:c.time,startTime:Date.now()}; 
+                            save(); updateUI(); 
+                        } 
+                    };
                 } else if (plot.status === 'growing') {
-                    div.className += ' growing'; div.innerHTML = `<span>${plot.icon}</span><div class="countdown" id="countdown-${i}">...</div>`;
+                    div.className += ' growing'; div.innerHTML = `<span style="font-size:24px;">${plot.icon}</span><div class="countdown" id="countdown-${i}">...</div>`;
                 } else if (plot.status === 'ready') {
-                    div.className += ' ready'; div.innerHTML = `<div>${plot.icon}</div><div class="plot-label">СБОР</div>`;
+                    div.className += ' ready'; div.innerHTML = `<span style="font-size:28px;">${plot.icon}</span><div class="plot-label">СБОР ✨</div>`;
                     div.onclick = function(e) { harvest(i, false, e); };
                 }
                 container.appendChild(div);
@@ -513,9 +602,9 @@
     function harvest(i, isAuto, event) {
         if (stock[1]+stock[2]+stock[3] >= getMaxStock()) return;
         stock[plots[i].type]++;
-        if (!isAuto && Math.random() < (0.1 + soilLevels[i]*0.02)) {
-            let bonus = getCropPrice(plots[i].type) * 5; money += bonus;
-            if(event && event.clientX) { showCritText(event.clientX, event.clientY, `✨ КРИТ +${bonus.toFixed(3)}$!`); }
+        if (!isAuto && Math.random() < (0.12 + soilLevels[i]*0.02)) {
+            let bonus = getCropPrice(plots[i].type) * 6; money += bonus; maxScore = Math.max(maxScore, money);
+            if(event && event.clientX) { showCritText(event.clientX, event.clientY, `✨ КРИТ +${bonus.toFixed(4)}$!`); }
         }
         plots[i] = { status: 'empty', startTime: 0, duration: 0, icon: '', type: 1 };
         progressQuest('harvest', 1); save(); updateUI();
@@ -523,7 +612,7 @@
 
     function showCritText(x, y, text) {
         let el = document.createElement('div'); el.className = 'crit-text'; el.innerText = text; el.style.left = x+'px'; el.style.top = y+'px'; el.style.position='fixed';
-        document.body.appendChild(el); setTimeout(() => el.remove(), 1000);
+        document.body.appendChild(el); setTimeout(() => el.remove(), 1200);
     }
 
     function startProcessing() {
@@ -543,12 +632,32 @@
     function buySeeds() { if (money >= 0.10) { money -= 0.10; seeds += 10; save(); updateUI(); } }
     function buyAutoTractor() { if (money >= tractorCost) { money -= tractorCost; tractorsCount++; tractorCost = parseFloat((tractorCost * 1.8).toFixed(2)); save(); updateUI(); } }
     function refuelTractor() { if (money >= 0.50) { money -= 0.50; currentFuel = getMaxFuel(); save(); updateUI(); } }
-    function upgrade(t) { let c = getUpgradeCost(t, t==='stock'?upStockLvl:upFactLvl); if(money>=c){ money-=c; if(t==='stock')upStockLvl++; else upFactLvl++; save(); updateUI(); } }
-    function upgradeCrop(t) { let c = getCropUpgradeCost(t); if(money>=c){ money-=c; cropLevels[t]++; save(); updateUI(); } }
+    
+    // ИСПРАВЛЕНА ФУНКЦИЯ МОДЕРНИЗАЦИИ ТЕХНИКИ
+    function upgrade(type) { 
+        let cost = getUpgradeCost(type); 
+        if (money >= cost) { 
+            money -= cost; 
+            if (type === 'stock') upStockLvl++; 
+            else if (type === 'factory') upFactLvl++;
+            else if (type === 'fuel') upFuelLvl++;
+            save(); updateUI(); 
+        } else { alert('❌ Недостаточно средств для апгрейда!'); }
+    }
+    
+    // ИСПРАВЛЕНА ФУНКЦИЯ СЕЛЕКЦИИ КУЛЬТУР
+    function upgradeCrop(type) { 
+        let cost = getCropUpgradeCost(type); 
+        if (money >= cost) { 
+            money -= cost; 
+            cropLevels[type]++; 
+            save(); updateUI(); 
+        } else { alert('❌ Недостаточно средств для селекции!'); }
+    }
 
     function watchAdWithAntiCheat() {
         let num1 = Math.floor(Math.random() * 5) + 2; let num2 = Math.floor(Math.random() * 4) + 1;
-        let ans = prompt(`Сколько будет ${num1} + ${num2}?`);
+        let ans = prompt(`Защита от авто-кликеров! Сколько будет ${num1} + ${num2}?`);
         if (ans && parseInt(ans) === (num1 + num2)) { money += AD_REWARD; maxScore = Math.max(maxScore, money); save(); updateUI(); }
     }
 
@@ -556,17 +665,17 @@
         let lastSave = parseInt(localStorage.getItem('mx_last_save_time')) || 0;
         if (lastSave === 0) return;
         let sec = Math.floor((Date.now() - lastSave) / 1000);
-        if (sec < 30) return;
+        if (sec < 20) return;
         let maxSec = Math.min(7200, sec);
         if (tractorsCount > 0 && currentFuel > 0) {
             let burn = 0.1 * tractorsCount * maxSec;
             let work = burn > currentFuel ? Math.floor(currentFuel / (0.1 * tractorsCount)) : maxSec;
             currentFuel = Math.max(0, currentFuel - burn);
             recalculateLevel();
-            let earn = Math.floor(work / 5) * tractorsCount * getCropPrice(level >= 5 ? 3 : level >= 3 ? 2 : 1);
+            let earn = Math.floor(work / 5) * tractorsCount * getCropPrice(level >= 4 ? 3 : level >= 3 ? 2 : 1);
             if (earn > 0) {
                 money += earn; maxScore = Math.max(maxScore, money);
-                document.getElementById('offline-report').innerHTML = `Вы спали, тракторы пахали!<br>Заработано: <b style="color:#2ecc71;">+${earn.toFixed(4)}$</b>`;
+                document.getElementById('offline-report').innerHTML = `Вы отсутствовали, но тракторы работали!<br>Чистая прибыль: <b style="color:#10b981;">+${earn.toFixed(4)}$</b>`;
                 document.getElementById('offline-overlay').style.display = 'block'; document.getElementById('offline-modal').style.display = 'block';
             }
         }
@@ -576,7 +685,10 @@
 
     function updateUI() {
         checkPlayerRegistration();
+        recalculateLevel();
         const now = Date.now();
+        
+        document.getElementById('player-rank-badge').innerText = `👑 [Ур. ${level}] ${levelTitle}`;
         document.getElementById('money').innerText = fmt(money);
         document.getElementById('seeds').innerText = seeds;
         document.getElementById('prestige-seeds').innerText = prestigeSeeds;
@@ -588,26 +700,52 @@
         document.getElementById('stock-bar').style.width = (tStock/mStock*100) + '%'; document.getElementById('stock-text').innerText = `${tStock}/${mStock}`;
         document.getElementById('inv-carrot').innerText = stock[1]; document.getElementById('inv-tomato').innerText = stock[2]; document.getElementById('inv-watermelon').innerText = stock[3]; document.getElementById('inv-processed').innerText = processedStock;
 
-        if (isFactoryRunning) { document.getElementById('factory-bar').style.width = factoryProgress + '%'; document.getElementById('factory-text').innerText = `Завод... ${Math.floor(factoryProgress)}%`; } 
+        if (isFactoryRunning) { document.getElementById('factory-bar').style.width = factoryProgress + '%'; document.getElementById('factory-text').innerText = `Консервирование... ${Math.floor(factoryProgress)}%`; } 
         else { document.getElementById('factory-bar').style.width = '0%'; document.getElementById('factory-text').innerText = 'Свободен'; }
 
-        document.getElementById('tractor-cost').innerText = tractorCost;
+        document.getElementById('tractor-cost').innerText = tractorCost.toFixed(2);
         document.getElementById('fuel-display').innerText = `${Math.max(0, currentFuel).toFixed(1)}/${getMaxFuel()} л.`;
-        document.getElementById('price-c').innerText = getCropPrice(1).toFixed(5); document.getElementById('price-t').innerText = getCropPrice(2).toFixed(5); document.getElementById('price-w').innerText = getCropPrice(3).toFixed(5); document.getElementById('price-p').innerText = getProcessedPrice().toFixed(4);
+        document.getElementById('tractor-status').innerText = `Количество тракторов: ${tractorsCount}`;
+        
+        document.getElementById('price-c').innerText = getCropPrice(1).toFixed(4); 
+        document.getElementById('price-t').innerText = getCropPrice(2).toFixed(4); 
+        document.getElementById('price-w').innerText = getCropPrice(3).toFixed(4); 
+        document.getElementById('price-p').innerText = getProcessedPrice().toFixed(4);
+
+        // Обновление кнопок апгрейда текстом цен
+        document.getElementById('cost-u-stock').innerText = getUpgradeCost('stock').toFixed(2);
+        document.getElementById('cost-u-fact').innerText = getUpgradeCost('factory').toFixed(2);
+        document.getElementById('cost-u-fuel').innerText = getUpgradeCost('fuel').toFixed(2);
+        
+        document.getElementById('cost-c-c').innerText = getCropUpgradeCost(1).toFixed(2);
+        document.getElementById('cost-c-t').innerText = getCropUpgradeCost(2).toFixed(2);
+        document.getElementById('cost-c-w').innerText = getCropUpgradeCost(3).toFixed(2);
+        
+        document.getElementById('lvl-c').innerText = cropLevels[1];
+        document.getElementById('lvl-t').innerText = cropLevels[2];
+        document.getElementById('lvl-w').innerText = cropLevels[3];
+
+        let curPestPrice = PEST_PRICES[Math.min(pesticideDailyUses, PEST_PRICES.length - 1)];
+        document.getElementById('pest-use-count').innerText = `Цена: ${curPestPrice}$ (Куплено сегодня: ${pesticideDailyUses}/5)`;
+
+        const pTimerEl = document.getElementById('pesticide-timer');
+        if (pesticideUntil > now) {
+            pTimerEl.innerText = `🧴 Защита: ${Math.ceil((pesticideUntil - now)/1000)}с`;
+            pTimerEl.style.color = "#10b981";
+        } else { pTimerEl.innerText = `🧴 Защита: Выкл`; pTimerEl.style.color = "#fff"; }
+
+        document.getElementById('dog-status').innerText = dogCharges > 0 ? `🐕 Пёс: ${dogCharges} ав!` : `🐕 Пёс: Нет`;
 
         const mTimerEl = document.getElementById('manager-timer');
         if (managerUntil > now) {
             let left = Math.ceil((managerUntil - now)/1000);
-            mTimerEl.innerText = `🤖 Менеджер работает: ${Math.floor(left/60)}м ${left%60}с`;
-            mTimerEl.style.color = "#1abc9c";
+            mTimerEl.innerText = `🤖 Менеджер активен: ${Math.floor(left/60)}м ${left%60}с`;
+            mTimerEl.style.color = "#2dd4bf";
         } else { mTimerEl.innerText = `🤖 Менеджер склада: Выкл`; mTimerEl.style.color = "#fff"; }
 
-        let sLeft = Math.max(0, Math.ceil((seasonEndTime - now)/1000));
-        document.getElementById('season-timer').innerText = `${Math.floor(sLeft/60)}:${String(sLeft%60).padStart(2,'0')}`;
-
-        // ТАБЛИЦА ЛИДЕРОВ: Сортировка по заработанным очкам
+        // ТАБЛИЦА ЛИДЕРОВ
         const all = bots.concat([{ name: playerName, money: maxScore, isPlayer: true }]).sort((a,b) => b.money - a.money);
-        document.getElementById('leaderboard').innerHTML = all.slice(0, 7).map((p, index) => {
+        document.getElementById('leaderboard').innerHTML = all.slice(0, 8).map((p, index) => {
             let medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `#${index+1}`;
             return `<div class="leader-item ${p.isPlayer?'player-row':''}"><span>${medal} ${p.name}</span><span>${p.money.toFixed(4)}$</span></div>`;
         }).join('');
@@ -617,12 +755,12 @@
         document.getElementById('p-bonus-t').innerText = prestigeSeeds > 0 ? pBns : '';
         document.getElementById('p-bonus-w').innerText = prestigeSeeds > 0 ? pBns : '';
 
-        let tr = document.getElementById('market-trend'); tr.innerText = lastTrend === 'up' ? '📈 РОСТ' : '📉 КРИЗИС'; tr.className = 'trend ' + (lastTrend === 'up' ? 'trend-up' : 'trend-down');
+        let tr = document.getElementById('market-trend'); tr.innerText = lastTrend === 'up' ? '📈 РОСТ' : '📉 СПАД'; tr.className = 'trend ' + (lastTrend === 'up' ? 'trend-up' : 'trend-down');
 
         document.getElementById('quests-container').innerHTML = activeQuests.map((q, idx) => {
             return `<div class="quest-card ${q.current>=q.target?'ready-to-claim':''}">
-                <span>📋 Контракт: ${q.text} (${q.current}/${q.target})</span>
-                ${q.current >= q.target && !q.claimed ? `<button class="claim-btn" onclick="claimQuestReward(${idx})">Забрать</button>` : ''}
+                <span>📋 Квест: ${q.text} (${q.current}/${q.target})</span>
+                ${q.current >= q.target && !q.claimed ? `<br><button class="claim-btn" onclick="claimQuestReward(${idx})">🎁 Получить награду</button>` : ''}
             </div>`;
         }).join('');
 
@@ -637,7 +775,6 @@
         localStorage.setItem('mx_up_stock', upStockLvl); localStorage.setItem('mx_up_fact', upFactLvl); localStorage.setItem('mx_up_fuel', upFuelLvl); localStorage.setItem('mx_fuel', currentFuel);
         localStorage.setItem('mx_prestige_seeds', prestigeSeeds); localStorage.setItem('mx_soil_lvls', JSON.stringify(soilLevels));
         localStorage.setItem('mx_auto_coupons', autoCoupons); localStorage.setItem('mx_manager_until', managerUntil); localStorage.setItem('mx_manager_reset_day', managerLastResetDay);
-        localStorage.setItem('mx_season_end', seasonEndTime);
         localStorage.setItem('mx_last_save_time', Date.now());
     }
 
@@ -649,35 +786,56 @@
 
         setInterval(function() {
             const now = Date.now();
-            checkSeasonEnd();
+            checkCronTimers();
             runManagerLogic();
 
+            // Работа завода
             if (isFactoryRunning) {
-                factoryProgress += (5 + upFactLvl * 2); 
+                factoryProgress += 8; 
                 if (factoryProgress >= 100) {
                     isFactoryRunning = false; factoryProgress = 0;
-                    let speed = getFactorySpeed(); processedStock += speed;
+                    processedStock += getFactorySpeed();
                 }
             }
 
-            if (tractorsCount > 0 && currentFuel > 0) { currentFuel = Math.max(0, currentFuel - 0.1 * tractorsCount); }
+            if (tractorsCount > 0 && currentFuel > 0) { currentFuel = Math.max(0, currentFuel - 0.08 * tractorsCount); }
 
             plots.forEach(function(p, i) {
                 if (p.status === 'growing' && now - p.startTime >= p.duration) plots[i].status = 'ready';
+                
+                // Шанс появления жука (если нет пестицидов)
+                if (p.status === 'growing' && now - p.startTime < p.duration && Math.random() < 0.003 && now > pesticideUntil) {
+                    if (dogCharges > 0) {
+                        dogCharges--;
+                        progressQuest('bugs', 1);
+                    } else {
+                        plots[i].status = 'bugged';
+                    }
+                }
+
+                // Работа авто-тракторов
                 if (tractorsCount > 0 && currentFuel > 0 && unlockedPlots[i]) {
                     if (plots[i].status === 'ready') harvest(i, true);
                     if (plots[i].status === 'empty') {
                         if (i >= FREE_PLOTS && seeds <= 0 && money >= 0.10) { money -= 0.10; seeds += 10; }
-                        if (i < FREE_PLOTS || seeds > 0) { if(i>=FREE_PLOTS) seeds--; const c=getCropData(i); plots[i]={status:'growing',icon:c.icon,type:c.type,duration:c.time,startTime:Date.now()}; }
+                        if (i < FREE_PLOTS || seeds > 0) { 
+                            if(i>=FREE_PLOTS) seeds--; 
+                            const c=getCropData(i); 
+                            plots[i]={status:'growing',icon:c.icon,type:c.type,duration:c.time,startTime:Date.now()}; 
+                        }
                     }
                 }
             });
 
-            // ИМИТАЦИЯ АКТИВНОСТИ БОТОВ: капает очень маленькая сумма денег
-            bots.forEach(b => { b.money += b.baseIncome * (Math.random() * 0.5 + 0.5); });
+            // Начисление ботам за секунду
+            bots.forEach(b => { b.money += b.baseIncome * (Math.random() * 0.4 + 0.6); });
 
-            if (Math.floor(now / 1000) % 10 === 0) { lastTrend = Math.random() > 0.4 ? 'up' : 'down'; }
-            if (Math.floor(now / 1000) % 30 === 0) currentWeather = WEATHER_TYPES[Math.floor(Math.random() * WEATHER_TYPES.length)];
+            if (Math.floor(now / 1000) % 15 === 0) { lastTrend = Math.random() > 0.4 ? 'up' : 'down'; }
+            if (Math.floor(now / 1000) % 45 === 0) currentWeather = WEATHER_TYPES[Math.floor(Math.random() * WEATHER_TYPES.length)];
+
+            // Общие часы
+            let d = new Date();
+            document.getElementById('clock').innerText = d.toTimeString().split(' ')[0];
 
             save(); updateUI();
         }, 1000);
@@ -686,10 +844,14 @@
             const now = Date.now();
             plots.forEach(function(plot, i) {
                 if (plot.status === 'growing') {
-                    const el = document.getElementById('countdown-' + i); if (el) el.innerText = formatTimeLeft(plot.duration - (now - plot.startTime));
+                    const el = document.getElementById('countdown-' + i); 
+                    if (el) {
+                        let left = Math.ceil((plot.duration - (now - plot.startTime)) / 1000);
+                        el.innerText = left <= 0 ? 'Готово!' : left + 'с';
+                    }
                 }
             });
-        }, 100);
+        }, 200);
     });
 </script>
 </body>
