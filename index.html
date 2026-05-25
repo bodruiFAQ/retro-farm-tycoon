@@ -276,7 +276,7 @@
             <button class="info-trigger" onclick="openInfo('Турнирные сезоны', 'Дневной ТОП обновляется каждую ночь в 00:00. Большой Недельный сезон сбрасывается в ночь на понедельник. Тапни на любого бота в списке, чтобы рассмотреть его ферму!')">[!] Инфо</button>
         </div>
         <div style="font-size:11px; background:rgba(0,0,0,0.2); padding:8px; border-radius:8px; margin-bottom:8px; line-height:1.4; font-weight: bold; text-align: center; color: #a855f7; border: 1px solid rgba(168,85,247,0.3);">
-            👥 Всего участников в сезоне: <span id="total-server-players">2 481 394</span>
+            👥 Всего участников в сезоне: <span id="total-server-players">101</span>
         </div>
         <div style="font-size:11px; background:rgba(0,0,0,0.2); padding:8px; border-radius:8px; margin-bottom:8px; line-height:1.4;">
             ⏱️ Сброс Дневного топа: <b style="color:#f87171;" id="day-timer">00:00:00</b><br>
@@ -316,9 +316,6 @@
     const PLOT_UNLOCK_COSTS = [0, 0, 0, 1.0, 5.0, 20.0, 50.0, 150.0, 500.0];
     const TRACTOR_BASE_COST = 5.0;
     const AD_REWARD = 2.0;
-    
-    // Фейковое, но реалистичное число игроков в базе данных
-    const TOTAL_SERVER_PLAYERS_COUNT = 2481394;
 
     const BASE_REWARDS = { 1: 0.0005, 2: 0.0020, 3: 0.0100 };
     const BASE_TIMES   = { 1: 2000,   2: 4500,   3: 9000 };
@@ -386,11 +383,12 @@
     let level = 1;
     let levelTitle = "Начинающий";
 
+    // Генерируем ровно 100 ботов для локальной группы соревнований
     let bots = JSON.parse(localStorage.getItem('mx_generated_bots_v4'));
     if (!bots) {
         bots = [];
         let tempNicks = [...REALISTIC_NICKNAMES].sort(() => Math.random() - 0.5);
-        for(let i=1; i<=99; i++) {
+        for(let i=1; i<=100; i++) {
             let baseNick = tempNicks[i % tempNicks.length];
             if (i >= tempNicks.length) baseNick += Math.random() > 0.5 ? "_77" : "7";
             
@@ -868,7 +866,10 @@
             mTimerEl.style.color = "#2dd4bf";
         } else { mTimerEl.innerText = `🤖 Менеджер склада: Выкл`; mTimerEl.style.color = "#fff"; }
 
-        // Генерация таблицы лидеров с подвалом о миллионах скрытых участников
+        // ЧЕСТНЫЙ СЧЕТЧИК ТАБЛИЦЫ ЛИДЕРОВ (100 ботов + 1 игрок)
+        let totalPlayersInSystem = bots.length + 1; 
+        document.getElementById('total-server-players').innerText = totalPlayersInSystem;
+
         const all = bots.concat([{ name: playerName, money: maxScore, isPlayer: true }]).sort((a,b) => b.money - a.money);
         let leaderboardHTML = all.slice(0, 8).map((p, index) => {
             let medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `#${index+1}`;
@@ -880,9 +881,11 @@
             }
         }).join('');
         
-        // Добавление заглушки "остальных участников" в подвал таблицы
-        let hiddenPlayersCount = TOTAL_SERVER_PLAYERS_COUNT - 8;
-        leaderboardHTML += `<div class="leader-item footer-row">... и ещё ${hiddenPlayersCount.toLocaleString('ru-RU')} игроков ниже в списке</div>`;
+        // Показываем, сколько реально участников находится ниже ТОП-8
+        let hiddenPlayersCount = totalPlayersInSystem - 8;
+        if (hiddenPlayersCount > 0) {
+            leaderboardHTML += `<div class="leader-item footer-row">... и ещё ${hiddenPlayersCount} игроков ниже в списке</div>`;
+        }
         document.getElementById('leaderboard').innerHTML = leaderboardHTML;
 
         let pBns = `(+${prestigeSeeds*25}%)`;
