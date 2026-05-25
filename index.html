@@ -383,7 +383,6 @@
     let level = 1;
     let levelTitle = "Начинающий";
 
-    // Генерируем ровно 100 ботов для локальной группы соревнований
     let bots = JSON.parse(localStorage.getItem('mx_generated_bots_v4'));
     if (!bots) {
         bots = [];
@@ -866,7 +865,6 @@
             mTimerEl.style.color = "#2dd4bf";
         } else { mTimerEl.innerText = `🤖 Менеджер склада: Выкл`; mTimerEl.style.color = "#fff"; }
 
-        // ЧЕСТНЫЙ СЧЕТЧИК ТАБЛИЦЫ ЛИДЕРОВ (100 ботов + 1 игрок)
         let totalPlayersInSystem = bots.length + 1; 
         document.getElementById('total-server-players').innerText = totalPlayersInSystem;
 
@@ -881,7 +879,6 @@
             }
         }).join('');
         
-        // Показываем, сколько реально участников находится ниже ТОП-8
         let hiddenPlayersCount = totalPlayersInSystem - 8;
         if (hiddenPlayersCount > 0) {
             leaderboardHTML += `<div class="leader-item footer-row">... и ещё ${hiddenPlayersCount} игроков ниже в списке</div>`;
@@ -945,12 +942,14 @@
             plots.forEach(function(p, i) {
                 if (p.status === 'growing' && now - p.startTime >= p.duration) plots[i].status = 'ready';
                 
+                // Исправленная логика Пса-Охотника (ловкие перехваты вредителей)
                 if (p.status === 'growing' && now - p.startTime < p.duration && Math.random() < 0.003 && now > pesticideUntil) {
                     if (dogCharges > 0) {
                         dogCharges--;
                         progressQuest('bugs', 1);
+                        // Пёс поймал жука на лету! Грядка продолжает расти дальше.
                     } else {
-                        plots[i].status = 'bugged';
+                        plots[i].status = 'bugged'; // Зарядов нет — грядка заражается жуком
                     }
                 }
 
